@@ -1,12 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PageTransition from '../../../../components/animations/PageTransition';
+import { Rectangle } from '../../../../components/pages/auth/ui/Rectangle';
 
 export default function ForgotPassword() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [isResponsive, setIsResponsive] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const handleResize = () => {
+      setIsResponsive(window.innerWidth < 1024);
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,6 +29,258 @@ export default function ForgotPassword() {
     console.log('Forgot password for:', email);
   };
 
+  if (!isMounted) {
+    return null;
+  }
+
+  // Mobile/Tablet Layout (< 1024px)
+  if (isResponsive) {
+    return (
+      <PageTransition>
+        <div
+          style={{
+            width: '100vw',
+            minHeight: '100vh',
+            background: '#FFFFFF',
+            fontFamily: 'Montserrat, sans-serif',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Animated Green Rectangle Background - Fixed */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+            }}
+          >
+            <Rectangle color="green" isResponsive={true} />
+          </div>
+
+          {/* Content Wrapper - Above Rectangle */}
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '30px 20px',
+              paddingBottom: '50px',
+              overflow: 'auto',
+              minHeight: '100vh',
+            }}
+          >
+          {/* Back Button */}
+          <button
+            onClick={() => router.push('/signin')}
+            style={{
+              alignSelf: 'flex-start',
+              marginBottom: '20px',
+              padding: '6px 12px',
+              background: 'none',
+              border: 'none',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+              fontFamily: 'Montserrat',
+              fontWeight: 500,
+              fontSize: '16px',
+              color: '#1D1B20',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#F3F4F6')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1D1B20" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back</span>
+          </button>
+
+          {/* Logo */}
+          <img
+            src="/onedot-large.svg"
+            alt="OneDot"
+            style={{
+              height: 'auto',
+              width: '100px',
+              marginBottom: '20px',
+              alignSelf: 'flex-start',
+            }}
+          />
+
+          {/* Title */}
+          <h1
+            style={{
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: 700,
+              fontSize: 'clamp(28px, 6vw, 40px)',
+              lineHeight: '120%',
+              color: '#171923',
+              marginBottom: '8px',
+            }}
+          >
+            Forgot Password
+          </h1>
+
+          {/* Subtitle */}
+          <div
+            style={{
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              fontSize: 'clamp(13px, 3vw, 16px)',
+              lineHeight: '150%',
+              color: '#718096',
+              marginBottom: '30px',
+              display: 'flex',
+              gap: '4px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <span>Enter your email address and we'll send you a link to reset your password.</span>
+          </div>
+
+          {/* Form Container */}
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px',
+            }}
+          >
+            {/* Email Input */}
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <label
+                style={{
+                  fontFamily: 'Montserrat',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  fontSize: 'clamp(12px, 3vw, 16px)',
+                  lineHeight: '20px',
+                  letterSpacing: '-0.154px',
+                  color: '#718096',
+                }}
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="example@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  width: '100%',
+                  minHeight: '44px',
+                  background: '#F7FAFC',
+                  border: '1px solid #CBD5E0',
+                  boxShadow: 'inset 0px 2px 0px rgba(231, 235, 238, 0.2)',
+                  borderRadius: '10px',
+                  padding: '10px 12px',
+                  fontFamily: 'Montserrat',
+                  fontSize: 'clamp(12px, 3vw, 16px)',
+                  lineHeight: '20px',
+                  color: '#4A5568',
+                  letterSpacing: '-0.154px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#1CB75E';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#CBD5E0';
+                }}
+                required
+              />
+            </div>
+
+            {/* Send Reset Link Button */}
+            <button
+              onClick={handleSubmit}
+              style={{
+                width: '100%',
+                minHeight: '44px',
+                border: 'none',
+                borderRadius: '10px',
+                background: '#1CB75E',
+                fontFamily: 'Montserrat',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                fontSize: 'clamp(14px, 3vw, 18px)',
+                lineHeight: '28px',
+                color: '#FFFFFF',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#168A47';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#1CB75E';
+              }}
+            >
+              Send Reset Link
+            </button>
+
+            {/* Back to Sign In */}
+            <div
+              style={{
+                fontFamily: 'Montserrat',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                fontSize: 'clamp(13px, 3vw, 16px)',
+                lineHeight: '150%',
+                color: '#718096',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                marginTop: '8px',
+                flexWrap: 'wrap',
+              }}
+            >
+              <span>Remember your password?</span>
+              <a
+                href="/signin"
+                style={{
+                  fontFamily: 'Montserrat',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  fontSize: 'clamp(13px, 3vw, 16px)',
+                  lineHeight: '150%',
+                  color: '#1C4532',
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                }}
+              >
+                Sign In
+              </a>
+            </div>
+          </div>
+        </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
+  // Desktop Layout (>= 1024px) - Original design
   return (
     <PageTransition>
       {/* Back Button */}
@@ -54,6 +321,7 @@ export default function ForgotPassword() {
           height: '100vh',
           background: '#FFFFFF',
           fontFamily: 'Montserrat, sans-serif',
+          overflow: 'hidden',
         }}
       >
         {/* Green Rectangle Decoration */}

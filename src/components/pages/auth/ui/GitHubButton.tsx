@@ -1,9 +1,33 @@
 import React from 'react';
 
-export const GitHubButton: React.FC = () => {
+interface GitHubButtonProps {
+  isResponsive?: boolean;
+}
+
+export const GitHubButton: React.FC<GitHubButtonProps> = ({ isResponsive }) => {
   return (
     <button
-      style={{
+      style={isResponsive ? {
+        width: '100%',
+        border: '1.5px solid #E2E8F0',
+        borderRadius: '12px',
+        background: '#FFFFFF',
+        fontFamily: 'Montserrat',
+        fontStyle: 'normal',
+        fontWeight: 500,
+        fontSize: 'clamp(14px, 1.7vh, 18px)',
+        lineHeight: '28px',
+        color: '#1A202C',
+        cursor: 'pointer',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '10px',
+        transition: 'all 0.2s ease',
+        boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.03)',
+        padding: '12px 24px',
+        minHeight: '44px',
+      } : {
         position: 'absolute',
         width: '27.5%',
         height: '5.6%',

@@ -7,6 +7,7 @@ interface RectangleProps {
   className?: string;
   style?: React.CSSProperties;
   children?: React.ReactNode;
+  isResponsive?: boolean;
 }
 
 const colorMap: Record<RectangleColor, string> = {
@@ -20,7 +21,8 @@ export const Rectangle: React.FC<RectangleProps> = ({
   color = 'yellow',
   className,
   style,
-  children
+  children,
+  isResponsive
 }) => {
   const getShapeClass = () => {
     switch (color) {
@@ -35,7 +37,16 @@ export const Rectangle: React.FC<RectangleProps> = ({
   return (
     <div
       className={`${className} ${getShapeClass()}`}
-      style={{
+      style={isResponsive ? {
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        top: 0,
+        left: 0,
+        background: colorMap[color],
+        overflow: 'hidden',
+        ...style,
+      } : {
         position: 'absolute',
         width: '40%',
         height: '76%',
