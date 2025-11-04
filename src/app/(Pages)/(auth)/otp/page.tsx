@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import PageTransition from '../../../components/animations/PageTransition';
+import PageTransition from '../../../../components/animations/PageTransition';
 
 export default function OTP() {
   const router = useRouter();

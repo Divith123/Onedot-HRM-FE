@@ -11,8 +11,8 @@ import {
   ForgotPasswordLink,
   OrDivider,
   Rectangle
-} from '../../../components/pages/auth/ui';
-import PageTransition from '../../../components/animations/PageTransition';
+} from '../../../../components/pages/auth/ui';
+import PageTransition from '../../../../components/animations/PageTransition';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');

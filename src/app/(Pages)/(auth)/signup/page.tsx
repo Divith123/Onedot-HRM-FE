@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import PageTransition from '../../../components/animations/PageTransition';
+import PageTransition from '../../../../components/animations/PageTransition';
 import {
   EmailInput,
   PasswordInput,
@@ -11,7 +11,7 @@ import {
   GitHubButton,
   ForgotPasswordLink,
   OrDivider
-} from '../../../components/pages/auth/ui';
+} from '../../../../components/pages/auth/ui';
 
 export default function SignUp() {
   const [name, setName] = useState('');
@@ -40,6 +40,7 @@ export default function SignUp() {
       >
       {/* Blue Rectangle Decoration */}
       <div
+        className="blue-floating-shapes"
         style={{
           position: 'absolute',
           width: '40%',
@@ -52,6 +53,7 @@ export default function SignUp() {
       >
         {/* Gradient Circle Background - moved to right side */}
         <div
+          className="animated-circle"
           style={{
             position: 'absolute',
             width: '40.3%',
@@ -61,6 +63,47 @@ export default function SignUp() {
             background: 'linear-gradient(180deg, rgba(247, 250, 252, 0.8) 0%, rgba(237, 242, 247, 0.4) 100%)',
             transform: 'matrix(0.93, 0.38, -0.53, 0.85, 0, 0)',
             borderRadius: '50%',
+          }}
+        />
+        {/* Floating Shapes */}
+        <div
+          className="shape-1"
+          style={{
+            position: 'absolute',
+            width: '60px',
+            height: '60px',
+            left: '15%',
+            top: '20%',
+            background: 'rgba(255, 255, 255, 0.2)',
+            borderRadius: '50%',
+            backdropFilter: 'blur(10px)',
+          }}
+        />
+        <div
+          className="shape-2"
+          style={{
+            position: 'absolute',
+            width: '40px',
+            height: '40px',
+            left: '70%',
+            top: '60%',
+            background: 'rgba(255, 255, 255, 0.15)',
+            borderRadius: '20px',
+            transform: 'rotate(45deg)',
+            backdropFilter: 'blur(8px)',
+          }}
+        />
+        <div
+          className="shape-3"
+          style={{
+            position: 'absolute',
+            width: '80px',
+            height: '30px',
+            left: '25%',
+            top: '75%',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '15px',
+            backdropFilter: 'blur(12px)',
           }}
         />
         {/* Support Label in rectangle left corner */}
@@ -180,7 +223,7 @@ export default function SignUp() {
         <label
           style={{
             position: 'absolute',
-            width: '4.0vw',
+            width: '4.5vw',
             height: '1.9vh',
             left: '-1px',
             top: '0px',
@@ -191,6 +234,7 @@ export default function SignUp() {
             lineHeight: '20px',
             letterSpacing: '-0.154px',
             color: '#718096',
+            whiteSpace: 'nowrap',
           }}
         >
           Full Name

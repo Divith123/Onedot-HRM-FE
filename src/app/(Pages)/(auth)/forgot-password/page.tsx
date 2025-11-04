@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import PageTransition from '../../../components/animations/PageTransition';
+import PageTransition from '../../../../components/animations/PageTransition';
 
 export default function ForgotPassword() {
   const router = useRouter();
@@ -58,6 +58,7 @@ export default function ForgotPassword() {
       >
         {/* Green Rectangle Decoration */}
         <div
+          className="green-floating-shapes"
           style={{
             position: 'absolute',
             width: '40%',
@@ -70,6 +71,7 @@ export default function ForgotPassword() {
         >
           {/* Gradient Circle Background */}
           <div
+            className="animated-circle"
             style={{
               position: 'absolute',
               width: '40.3%',
@@ -79,6 +81,46 @@ export default function ForgotPassword() {
               background: 'linear-gradient(180deg, rgba(247, 250, 252, 0.8) 0%, rgba(237, 242, 247, 0.4) 100%)',
               transform: 'matrix(0.93, 0.38, -0.53, 0.85, 0, 0)',
               borderRadius: '50%',
+            }}
+          />
+          {/* Floating Shapes */}
+          <div
+            className="shape-1"
+            style={{
+              position: 'absolute',
+              width: '45px',
+              height: '45px',
+              left: '18%',
+              top: '30%',
+              background: 'rgba(255, 255, 255, 0.22)',
+              borderRadius: '22px',
+              backdropFilter: 'blur(9px)',
+            }}
+          />
+          <div
+            className="shape-2"
+            style={{
+              position: 'absolute',
+              width: '30px',
+              height: '30px',
+              left: '68%',
+              top: '50%',
+              background: 'rgba(255, 255, 255, 0.3)',
+              borderRadius: '50%',
+              backdropFilter: 'blur(5px)',
+            }}
+          />
+          <div
+            className="shape-3"
+            style={{
+              position: 'absolute',
+              width: '65px',
+              height: '20px',
+              left: '28%',
+              top: '72%',
+              background: 'rgba(255, 255, 255, 0.18)',
+              borderRadius: '10px',
+              backdropFilter: 'blur(11px)',
             }}
           />
           {/* Lock Icon */}

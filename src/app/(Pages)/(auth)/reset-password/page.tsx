@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import PageTransition from '../../../components/animations/PageTransition';
-import { PasswordInput } from '../../../components/pages/auth/ui';
+import PageTransition from '../../../../components/animations/PageTransition';
+import { PasswordInput } from '../../../../components/pages/auth/ui';
 
 export default function ResetPassword() {
   const router = useRouter();
@@ -37,6 +37,7 @@ export default function ResetPassword() {
       >
         {/* Red Rectangle Decoration - Left Side */}
         <div
+          className="red-floating-shapes"
           style={{
             position: 'absolute',
             width: '40%',
@@ -49,6 +50,7 @@ export default function ResetPassword() {
         >
           {/* Gradient Circle Background */}
           <div
+            className="animated-circle"
             style={{
               position: 'absolute',
               width: '40.3%',
@@ -58,6 +60,46 @@ export default function ResetPassword() {
               background: 'linear-gradient(180deg, rgba(247, 250, 252, 0.8) 0%, rgba(237, 242, 247, 0.4) 100%)',
               transform: 'matrix(0.93, 0.38, -0.53, 0.85, 0, 0)',
               borderRadius: '50%',
+            }}
+          />
+          {/* Floating Shapes */}
+          <div
+            className="shape-1"
+            style={{
+              position: 'absolute',
+              width: '50px',
+              height: '50px',
+              left: '20%',
+              top: '25%',
+              background: 'rgba(255, 255, 255, 0.25)',
+              borderRadius: '25px',
+              backdropFilter: 'blur(8px)',
+            }}
+          />
+          <div
+            className="shape-2"
+            style={{
+              position: 'absolute',
+              width: '35px',
+              height: '35px',
+              left: '65%',
+              top: '55%',
+              background: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: '50%',
+              backdropFilter: 'blur(6px)',
+            }}
+          />
+          <div
+            className="shape-3"
+            style={{
+              position: 'absolute',
+              width: '70px',
+              height: '25px',
+              left: '30%',
+              top: '70%',
+              background: 'rgba(255, 255, 255, 0.15)',
+              borderRadius: '12px',
+              backdropFilter: 'blur(10px)',
             }}
           />
           {/* Support Label in rectangle */}

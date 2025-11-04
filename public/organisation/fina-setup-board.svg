@@ -1,0 +1,67 @@
+<svg width="570" height="416" viewBox="0 0 570 416" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Background -->
+<rect width="570" height="416" rx="12" fill="#F8FAFC"/>
+
+<!-- Main Dashboard Container -->
+<rect x="32" y="48" width="442" height="331" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+
+<!-- Sidebar -->
+<rect x="0" y="0" width="264" height="416" fill="#03A9F5"/>
+
+<!-- Sidebar Pattern -->
+<defs>
+  <pattern id="sidebarPattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+    <circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/>
+  </pattern>
+</defs>
+<rect x="0" y="0" width="264" height="416" fill="url(#sidebarPattern)"/>
+
+<!-- Header -->
+<rect x="32" y="48" width="442" height="60" fill="#03A9F5" rx="8"/>
+<text x="52" y="78" fill="white" font-family="Montserrat" font-size="18" font-weight="600">HR Dashboard</text>
+
+<!-- Stats Cards -->
+<rect x="52" y="128" width="120" height="80" rx="6" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1"/>
+<text x="72" y="148" fill="#334155" font-family="Montserrat" font-size="12" font-weight="500">Total Employees</text>
+<text x="72" y="168" fill="#03A9F5" font-family="Montserrat" font-size="24" font-weight="700">247</text>
+
+<rect x="192" y="128" width="120" height="80" rx="6" fill="#F0F9FF" stroke="#0EA5E9" stroke-width="1"/>
+<text x="212" y="148" fill="#0F172A" font-family="Montserrat" font-size="12" font-weight="500">Active Projects</text>
+<text x="212" y="168" fill="#03A9F5" font-family="Montserrat" font-size="24" font-weight="700">12</text>
+
+<rect x="332" y="128" width="120" height="80" rx="6" fill="#F0FDF4" stroke="#22C55E" stroke-width="1"/>
+<text x="352" y="148" fill="#14532D" font-family="Montserrat" font-size="12" font-weight="500">Completed Tasks</text>
+<text x="352" y="168" fill="#22C55E" font-family="Montserrat" font-size="24" font-weight="700">89</text>
+
+<!-- Chart Area -->
+<rect x="52" y="228" width="400" height="120" rx="6" fill="#FAFAFA" stroke="#E2E8F0" stroke-width="1"/>
+<text x="72" y="248" fill="#64748B" font-family="Montserrat" font-size="14" font-weight="600">Performance Overview</text>
+
+<!-- Chart Bars -->
+<rect x="72" y="268" width="20" height="60" fill="#03A9F5" rx="2"/>
+<rect x="102" y="278" width="20" height="50" fill="#0EA5E9" rx="2"/>
+<rect x="132" y="258" width="20" height="70" fill="#0284C7" rx="2"/>
+<rect x="162" y="268" width="20" height="60" fill="#0369A1" rx="2"/>
+<rect x="192" y="248" width="20" height="80" fill="#03A9F5" rx="2"/>
+<rect x="222" y="258" width="20" height="70" fill="#0EA5E9" rx="2"/>
+<rect x="252" y="268" width="20" height="60" fill="#0284C7" rx="2"/>
+<rect x="282" y="278" width="20" height="50" fill="#0369A1" rx="2"/>
+<rect x="312" y="258" width="20" height="70" fill="#03A9F5" rx="2"/>
+<rect x="342" y="268" width="20" height="60" fill="#0EA5E9" rx="2"/>
+<rect x="372" y="278" width="20" height="50" fill="#0284C7" rx="2"/>
+<rect x="402" y="268" width="20" height="60" fill="#0369A1" rx="2"/>
+
+<!-- Sidebar Icons -->
+<circle cx="132" cy="80" r="3" fill="rgba(255,255,255,0.6)"/>
+<circle cx="132" cy="120" r="3" fill="rgba(255,255,255,0.6)"/>
+<circle cx="132" cy="160" r="3" fill="rgba(255,255,255,0.6)"/>
+<circle cx="132" cy="200" r="3" fill="rgba(255,255,255,0.6)"/>
+<circle cx="132" cy="240" r="3" fill="rgba(255,255,255,0.6)"/>
+
+<!-- Decorative Elements -->
+<circle cx="500" cy="100" r="8" fill="#03A9F5" opacity="0.3"/>
+<circle cx="480" cy="140" r="6" fill="#0EA5E9" opacity="0.4"/>
+<circle cx="520" cy="180" r="10" fill="#0284C7" opacity="0.2"/>
+<circle cx="490" cy="220" r="7" fill="#0369A1" opacity="0.5"/>
+<circle cx="510" cy="260" r="9" fill="#03A9F5" opacity="0.3"/>
+</svg>
