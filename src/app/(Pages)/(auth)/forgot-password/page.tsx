@@ -43,38 +43,13 @@ export default function ForgotPassword() {
             minHeight: '100vh',
             background: '#FFFFFF',
             fontFamily: 'Montserrat, sans-serif',
-            position: 'relative',
-            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '30px 20px',
+            paddingBottom: '50px',
+            overflow: 'auto',
           }}
         >
-          {/* Animated Green Rectangle Background - Fixed */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 0,
-              pointerEvents: 'none',
-            }}
-          >
-            <Rectangle color="green" isResponsive={true} />
-          </div>
-
-          {/* Content Wrapper - Above Rectangle */}
-          <div
-            style={{
-              position: 'relative',
-              zIndex: 10,
-              display: 'flex',
-              flexDirection: 'column',
-              padding: '30px 20px',
-              paddingBottom: '50px',
-              overflow: 'auto',
-              minHeight: '100vh',
-            }}
-          >
           {/* Back Button */}
           <button
             onClick={() => router.push('/signin')}
@@ -274,7 +249,6 @@ export default function ForgotPassword() {
               </a>
             </div>
           </div>
-        </div>
         </div>
       </PageTransition>
     );
