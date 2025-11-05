@@ -1,25 +1,86 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import PageTransition from '../../../../components/animations/PageTransition';
 import { PasswordInput } from '../../../../components/pages/auth/ui';
+import authService from '@/services/auth.service';
 
 export default function ResetPassword() {
   const router = useRouter();
+  const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Get email from session storage
+    if (typeof window !== 'undefined') {
+      const storedEmail = sessionStorage.getItem('resetEmail');
+      if (storedEmail) {
+        setEmail(storedEmail);
+      } else {
+        toast.error('Session expired. Please start the password reset process again.');
+        router.push('/forgot-password');
+      }
+    }
+  }, [router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword === confirmPassword && newPassword.length >= 8) {
-      console.log('Password reset:', newPassword);
-      // Handle password reset logic here
-      router.push('/signin');
-    } else {
-      alert('Passwords do not match or are too short');
+
+    // Validation
+    if (!newPassword) {
+      toast.error('Please enter a new password');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await authService.resetPassword({
+        email: email,
+        newPassword: newPassword,
+      });
+
+      if (response.success) {
+        toast.success(response.message || 'Password reset successfully!');
+
+        // Clear session storage
+        sessionStorage.removeItem('resetEmail');
+
+        // Redirect to signin
+        setTimeout(() => {
+          router.push('/signin');
+        }, 1500);
+      } else {
+        toast.error(response.message || 'Failed to reset password');
+      }
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('An error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -402,6 +463,7 @@ export default function ResetPassword() {
         {/* Reset Password Button */}
         <button
           onClick={handleSubmit}
+          disabled={isLoading}
           style={{
             position: 'absolute',
             width: '27.5%',
@@ -410,24 +472,25 @@ export default function ResetPassword() {
             top: '64%',
             border: 'none',
             borderRadius: '10px',
-            background: '#ED1C24',
+            background: isLoading ? '#CBD5E0' : '#ED1C24',
             fontFamily: 'Montserrat',
             fontStyle: 'normal',
             fontWeight: 500,
             fontSize: 'clamp(14px, 1.7vh, 18px)',
             lineHeight: '28px',
             color: '#FFFFFF',
-            cursor: 'pointer',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
             transition: 'background-color 0.2s',
+            opacity: isLoading ? 0.7 : 1,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#D0161E';
+            if (!isLoading) e.currentTarget.style.background = '#D0161E';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#ED1C24';
+            if (!isLoading) e.currentTarget.style.background = '#ED1C24';
           }}
         >
-          Reset Password
+          {isLoading ? 'Resetting...' : 'Reset Password'}
         </button>
 
       </div>

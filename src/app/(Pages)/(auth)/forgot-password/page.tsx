@@ -2,16 +2,59 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import PageTransition from '../../../../components/animations/PageTransition';
+import authService from '@/services/auth.service';
 
 export default function ForgotPassword() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle forgot password logic here
-    console.log('Forgot password for:', email);
+
+    // Validation
+    if (!email.trim()) {
+      toast.error('Please enter your email');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await authService.forgotPassword({
+        email: email.trim(),
+      });
+
+      if (response.success) {
+        toast.success(response.message || 'OTP sent to your email. Please check your inbox.');
+
+        // Store email temporarily for OTP verification
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('resetEmail', email.trim());
+        }
+
+        // Redirect to OTP verification page
+        setTimeout(() => {
+          router.push('/otp');
+        }, 1500);
+      } else {
+        toast.error(response.message || 'Failed to send OTP');
+      }
+    } catch (error: any) {
+      console.error('Forgot password error:', error);
+
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('An error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -293,6 +336,7 @@ export default function ForgotPassword() {
         {/* Send Reset Link Button */}
         <button
           onClick={handleSubmit}
+          disabled={isLoading}
           style={{
             position: 'absolute',
             width: '27.5%',
@@ -301,24 +345,25 @@ export default function ForgotPassword() {
             top: '58.3%',
             border: 'none',
             borderRadius: '10px',
-            background: '#ED1C24',
+            background: isLoading ? '#CBD5E0' : '#ED1C24',
             fontFamily: 'Montserrat',
             fontStyle: 'normal',
             fontWeight: 500,
             fontSize: 'clamp(14px, 1.7vh, 18px)',
             lineHeight: '28px',
             color: '#FFFFFF',
-            cursor: 'pointer',
+            cursor: isLoading ? 'not-allowed' : 'pointer',
             transition: 'background-color 0.2s',
+            opacity: isLoading ? 0.7 : 1,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#D0161E';
+            if (!isLoading) e.currentTarget.style.background = '#D0161E';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#ED1C24';
+            if (!isLoading) e.currentTarget.style.background = '#ED1C24';
           }}
         >
-          Send Reset Link
+          {isLoading ? 'Sending...' : 'Send Reset Link'}
         </button>
 
         {/* Back to Sign In */}
