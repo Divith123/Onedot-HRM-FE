@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import PageTransition from '../../../../components/animations/PageTransition';
+import { Rectangle } from '../../../../components/pages/auth/ui/Rectangle';
 import { PasswordInput } from '../../../../components/pages/auth/ui';
 import authService from '@/services/auth.service';
 
@@ -15,6 +16,8 @@ export default function ResetPassword() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResponsive, setIsResponsive] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     // Get email from session storage
@@ -28,6 +31,18 @@ export default function ResetPassword() {
       }
     }
   }, [router]);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const checkResponsive = () => {
+      setIsResponsive(window.innerWidth < 1024);
+    };
+    
+    checkResponsive();
+    window.addEventListener('resize', checkResponsive);
+    
+    return () => window.removeEventListener('resize', checkResponsive);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,9 +99,135 @@ export default function ResetPassword() {
     }
   };
 
+  if (!isMounted) {
+    return null;
+  }
+
+  // Mobile/Tablet Layout (< 1024px)
+  if (isResponsive) {
+    return (
+      <PageTransition>
+        <div
+          style={{
+            width: '100vw',
+            minHeight: '100vh',
+            background: '#FFFFFF',
+            fontFamily: 'Montserrat, sans-serif',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '30px 20px',
+            paddingBottom: '50px',
+            overflow: 'auto',
+          }}
+        >
+          {/* Logo */}
+          <img
+            src="/onedot-large.svg"
+            alt="OneDot"
+            style={{
+              height: 'auto',
+              width: '100px',
+              marginBottom: '20px',
+              alignSelf: 'flex-start',
+            }}
+          />
+
+          {/* Title */}
+          <h1
+            style={{
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: 700,
+              fontSize: 'clamp(28px, 6vw, 40px)',
+              lineHeight: '120%',
+              color: '#171923',
+              marginBottom: '8px',
+            }}
+          >
+            Reset Password
+          </h1>
+
+          {/* Subtitle */}
+          <div
+            style={{
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              fontSize: 'clamp(13px, 3vw, 16px)',
+              lineHeight: '150%',
+              color: '#718096',
+              marginBottom: '30px',
+              display: 'flex',
+              gap: '4px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <span>Enter your new password below to complete the reset process.</span>
+          </div>
+
+          {/* Form Container */}
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px',
+            }}
+          >
+            {/* New Password Input */}
+            <PasswordInput
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              showPassword={showNewPassword}
+              setShowPassword={setShowNewPassword}
+              isResponsive={true}
+            />
+
+            {/* Confirm Password Input */}
+            <PasswordInput
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              showPassword={showConfirmPassword}
+              setShowPassword={setShowConfirmPassword}
+              isResponsive={true}
+            />
+
+            {/* Reset Password Button */}
+            <button
+              onClick={handleSubmit}
+              style={{
+                width: '100%',
+                minHeight: '44px',
+                border: 'none',
+                borderRadius: '10px',
+                background: '#ED1C24',
+                fontFamily: 'Montserrat',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                fontSize: 'clamp(14px, 3vw, 18px)',
+                lineHeight: '28px',
+                color: '#FFFFFF',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#D0161E';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#ED1C24';
+              }}
+            >
+              Reset Password
+            </button>
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
+  // Desktop Layout (>= 1024px) - Original design
   return (
     <PageTransition>
-
       <div
         className="relative"
         style={{
@@ -94,6 +235,7 @@ export default function ResetPassword() {
           height: '100vh',
           background: '#FFFFFF',
           fontFamily: 'Montserrat, sans-serif',
+          overflow: 'hidden',
         }}
       >
         {/* Red Rectangle Decoration - Left Side */}
