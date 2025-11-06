@@ -339,7 +339,7 @@ export default function OTP() {
                   cursor: 'pointer',
                   fontSize: '13px',
                 }}
-                onClick={() => console.log('Resend OTP')}
+                onClick={handleResend}
               >
                 Resend
               </button>
