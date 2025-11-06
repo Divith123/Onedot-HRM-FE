@@ -16,7 +16,7 @@ class AuthService {
    * Sends verification email
    */
   async signup(data: SignupRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>('/Auth/signup', data);
+    const response = await api.post<AuthResponse>('/auth/signup', data);
     return response.data;
   }
 
