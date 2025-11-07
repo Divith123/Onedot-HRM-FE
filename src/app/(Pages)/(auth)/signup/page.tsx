@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import PageTransition from '../../../../components/animations/PageTransition';
 import { Rectangle } from '../../../../components/pages/auth/ui/Rectangle';
 import {
@@ -13,8 +15,10 @@ import {
   ForgotPasswordLink,
   OrDivider
 } from '../../../../components/pages/auth/ui';
+import authService from '@/services/auth.service';
 
 export default function SignUp() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,11 +40,87 @@ export default function SignUp() {
     
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ name, email, password, confirmPassword, agreeToTerms });
+
+    // Validation
+    if (!name.trim()) {
+      toast.error('Please enter your full name');
+      return;
+    }
+
+    if (name.trim().length < 2) {
+      toast.error('Full name must be at least 2 characters');
+      return;
+    }
+
+    if (!email.trim()) {
+      toast.error('Please enter your email');
+      return;
+    }
+
+    if (!password) {
+      toast.error('Please enter a password');
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (!agreeToTerms) {
+      toast.error('Please agree to the Terms & Conditions');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await authService.signup({
+        fullName: name.trim(),
+        email: email.trim(),
+        password: password,
+      });
+
+      if (response.success) {
+        toast.success(response.message || 'Account created successfully! Please check your email for verification code.');
+
+        // Store email temporarily for verification page
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('verificationEmail', email.trim());
+        }
+
+        // Redirect to OTP page with verification type
+        setTimeout(() => {
+          router.push('/otp?type=verification');
+        }, 1500);
+      } else {
+        toast.error(response.message || 'Failed to create account');
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
+
+      // Handle error response
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('An error occurred during signup. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
+
 
   if (!isMounted) {
     return null;
@@ -965,6 +1045,7 @@ export default function SignUp() {
       {/* Sign Up Button */}
       <button
         onClick={handleSubmit}
+        disabled={isLoading}
         style={{
           position: 'absolute',
           width: '27.5%',
@@ -973,24 +1054,25 @@ export default function SignUp() {
           top: '62%',
           border: 'none',
           borderRadius: '10px',
-          background: '#FFDE17',
+          background: isLoading ? '#CBD5E0' : '#FFDE17',
           fontFamily: 'Montserrat',
           fontStyle: 'normal',
           fontWeight: 500,
           fontSize: 'clamp(14px, 1.7vh, 18px)',
           lineHeight: '28px',
           color: '#FFFFFF',
-          cursor: 'pointer',
+          cursor: isLoading ? 'not-allowed' : 'pointer',
           transition: 'background-color 0.2s',
+          opacity: isLoading ? 0.7 : 1,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#E6C814';
+          if (!isLoading) e.currentTarget.style.background = '#E6C814';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = '#FFDE17';
+          if (!isLoading) e.currentTarget.style.background = '#FFDE17';
         }}
       >
-        Create Account
+        {isLoading ? 'Creating Account...' : 'Create Account'}
       </button>
 
       {/* OR Divider */}

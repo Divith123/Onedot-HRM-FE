@@ -3,9 +3,10 @@ import React from 'react';
 interface SignInButtonProps {
   onClick: (e: React.FormEvent) => void;
   isResponsive?: boolean;
+  isLoading?: boolean;
 }
 
-export const SignInButton: React.FC<SignInButtonProps> = ({ onClick, isResponsive }) => {
+export const SignInButton: React.FC<SignInButtonProps> = ({ onClick, isResponsive, isLoading = false }) => {
   return (
     <button
       type="submit"
@@ -33,7 +34,7 @@ export const SignInButton: React.FC<SignInButtonProps> = ({ onClick, isResponsiv
         height: '5.6%',
         left: '17.7%',
         top: '56.9%',
-        background: '#03A9F5',
+        background: isLoading ? '#CBD5E0' : '#03A9F5',
         borderRadius: '10px',
         border: 'none',
         fontFamily: 'Montserrat',
@@ -42,19 +43,20 @@ export const SignInButton: React.FC<SignInButtonProps> = ({ onClick, isResponsiv
         fontSize: 'clamp(16px, 1.9vh, 20px)',
         lineHeight: '28px',
         color: '#F7FAFC',
-        cursor: 'pointer',
+        cursor: isLoading ? 'not-allowed' : 'pointer',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        opacity: isLoading ? 0.7 : 1,
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = '#0291D6';
+        if (!isLoading) e.currentTarget.style.background = '#0291D6';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = '#03A9F5';
+        if (!isLoading) e.currentTarget.style.background = '#03A9F5';
       }}
     >
-      Sign in
+      {isLoading ? 'Signing in...' : 'Sign in'}
     </button>
   );
 };

@@ -12,6 +12,7 @@
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-slot": "^1.2.3",
+    "axios": "^1.13.2",
     "blueimp-load-image": "^5.16.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -21,6 +22,7 @@
     "next": "16.0.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "react-hot-toast": "^2.6.0",
     "react-image-crop": "^11.0.10",
     "styled-jsx": "^5.1.7",
     "tailwind-merge": "^3.3.1"

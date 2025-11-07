@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import {
   EmailInput,
   PasswordInput,
@@ -13,8 +15,12 @@ import {
   Rectangle
 } from '../../../../components/pages/auth/ui';
 import PageTransition from '../../../../components/animations/PageTransition';
+import authService from '@/services/auth.service';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignIn() {
+  const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,11 +38,59 @@ export default function SignIn() {
     window.addEventListener('resize', checkResponsive);
     return () => window.removeEventListener('resize', checkResponsive);
   }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ email, password, rememberMe });
+
+    // Validation
+    if (!email.trim()) {
+      toast.error('Please enter your email');
+      return;
+    }
+
+    if (!password) {
+      toast.error('Please enter your password');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await authService.signin({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (response.success && response.user) {
+        toast.success(response.message || 'Login successful!');
+
+        // Login user
+        login(response.user);
+
+        // Redirect to dashboard or setup page
+        setTimeout(() => {
+          router.push('/setup-org');
+        }, 1000);
+      } else {
+        toast.error(response.message || 'Failed to sign in');
+      }
+    } catch (error: any) {
+      console.error('Signin error:', error);
+
+      // Handle error response
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('An error occurred during sign in. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
+
 
   if (!isMounted) {
     return null;

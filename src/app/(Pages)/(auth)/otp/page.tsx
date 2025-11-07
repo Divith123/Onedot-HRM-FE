@@ -1,13 +1,53 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
+
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import toast from 'react-hot-toast';
 import { Rectangle } from '../../../../components/pages/auth/ui';
 import PageTransition from '../../../../components/animations/PageTransition';
+import authService from '@/services/auth.service';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default function OTP() {
+function OTPContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login } = useAuth();
+
+  const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [isLoading, setIsLoading] = useState(false);
+  const [otpType, setOtpType] = useState<'verification' | 'reset'>('reset');
+
+  useEffect(() => {
+    // Get email and type from session storage or URL params
+    if (typeof window !== 'undefined') {
+      // Check URL params first for type
+      const type = searchParams.get('type');
+
+      if (type === 'verification') {
+        setOtpType('verification');
+        const verificationEmail = sessionStorage.getItem('verificationEmail');
+        if (verificationEmail) {
+          setEmail(verificationEmail);
+        } else {
+          toast.error('No email found. Please sign up first.');
+          router.push('/signup');
+        }
+      } else {
+        // Default to reset password flow
+        setOtpType('reset');
+        const resetEmail = sessionStorage.getItem('resetEmail');
+        if (resetEmail) {
+          setEmail(resetEmail);
+        } else {
+          toast.error('No email found. Please start the password reset process again.');
+          router.push('/forgot-password');
+        }
+      }
+    }
+  }, [router, searchParams]);
   const [isResponsive, setIsResponsive] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -41,11 +81,85 @@ export default function OTP() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const otpValue = otp.join('');
-    if (otpValue.length === 6) {
-      console.log('OTP submitted:', otpValue);
+
+    if (otpValue.length !== 6) {
+      toast.error('Please enter all 6 digits');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (otpType === 'verification') {
+        // Email verification flow
+        const response = await authService.verifyEmail({
+          email: email,
+          verificationCode: otpValue,
+        });
+
+        if (response.success && response.user) {
+          toast.success(response.message || 'Email verified successfully!');
+
+          // Login user
+          login(response.user);
+
+          // Clear session storage
+          sessionStorage.removeItem('verificationEmail');
+
+          // Redirect to dashboard or org setup
+          setTimeout(() => {
+            router.push('/setup-org');
+          }, 1000);
+        } else {
+          toast.error(response.message || 'Invalid verification code');
+        }
+      } else {
+        // Password reset OTP verification flow
+        const response = await authService.verifyOtp({
+          email: email,
+          otp: otpValue,
+        });
+
+        if (response.success) {
+          toast.success(response.message || 'OTP verified successfully!');
+
+          // Redirect to reset password page
+          setTimeout(() => {
+            router.push('/reset-password');
+          }, 1000);
+        } else {
+          toast.error(response.message || 'Invalid OTP');
+        }
+      }
+    } catch (error: any) {
+      console.error('OTP verification error:', error);
+
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('An error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (otpType === 'verification') {
+      toast.success('Resend verification code feature coming soon. Please check your email.');
+    } else {
+      // Resend OTP for password reset
+      try {
+        await authService.forgotPassword({ email });
+        toast.success('New OTP sent to your email!');
+      } catch (error) {
+        toast.error('Failed to resend OTP. Please try again.');
+      }
     }
   };
 
@@ -227,7 +341,7 @@ export default function OTP() {
                   cursor: 'pointer',
                   fontSize: '13px',
                 }}
-                onClick={() => console.log('Resend OTP')}
+                onClick={handleResend}
               >
                 Resend
               </button>
@@ -283,7 +397,7 @@ export default function OTP() {
             color: '#171923',
           }}
         >
-          Enter OTP
+          {otpType === 'verification' ? 'Verify Your Email' : 'Enter OTP'}
         </h1>
 
         {/* Subtitle */}
@@ -300,12 +414,39 @@ export default function OTP() {
             fontSize: 'clamp(14px, 1.7vh, 18px)',
             lineHeight: '150%',
             color: '#718096',
-            display: 'flex',
-            alignItems: 'center',
+            textAlign: 'center',
+            marginBottom: '8px',
+            maxWidth: '380px',
+            padding: '0 20px',
           }}
         >
-          <span>We have sent a 6-digit code to your email</span>
+          {otpType === 'verification'
+            ? `We sent a verification code to ${email || 'your email'}`
+            : 'We have sent a 6-digit code to your email address'}
         </div>
+
+        {/* Info text based on type */}
+        <p
+          style={{
+            position: 'absolute',
+            width: '18.2%',
+            height: '2.5%',
+            left: '17.7%',
+            top: '28.5%',
+            fontFamily: 'Montserrat',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            fontSize: 'clamp(12px, 1.3vw, 14px)',
+            color: '#A0AEC0',
+            textAlign: 'center',
+            marginBottom: '22px',
+            maxWidth: '320px',
+          }}
+        >
+          {otpType === 'verification'
+            ? 'Code expires in 24 hours'
+            : 'Code expires in 10 minutes'}
+        </p>
 
         {/* OTP Input Fields Container */}
         <div
@@ -347,7 +488,7 @@ export default function OTP() {
         {/* Verify Button */}
         <button
           onClick={handleSubmit}
-          disabled={!isComplete}
+          disabled={!isComplete || isLoading}
           style={{
             position: 'absolute',
             left: '17.7%',
@@ -356,16 +497,28 @@ export default function OTP() {
             height: '44px',
             border: 'none',
             borderRadius: '8px',
-            background: isComplete ? '#03A9F5' : '#CBD5E0',
+            background: (isComplete && !isLoading) ? '#03A9F5' : '#CBD5E0',
             fontFamily: 'Montserrat',
             fontWeight: 600,
             fontSize: '16px',
-            color: isComplete ? '#FFFFFF' : '#A0AEC0',
-            cursor: isComplete ? 'pointer' : 'not-allowed',
-            transition: 'all 0.3s ease',
+            color: '#FFFFFF',
+            cursor: (isComplete && !isLoading) ? 'pointer' : 'not-allowed',
+            transition: 'background-color 0.2s',
+            marginBottom: '16px',
+            opacity: isLoading ? 0.7 : 1,
+          }}
+          onMouseEnter={(e) => {
+            if (isComplete && !isLoading) {
+              e.currentTarget.style.background = '#0291D6';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (isComplete && !isLoading) {
+              e.currentTarget.style.background = '#03A9F5';
+            }
           }}
         >
-          Verify
+          {isLoading ? 'Verifying...' : 'Verify'}
         </button>
 
         {/* Resend Link */}
@@ -380,7 +533,7 @@ export default function OTP() {
             color: '#718096',
           }}
         >
-          Didn't receive the code?{' '}
+          Didn&apos;t receive the code?{' '}
           <button
             style={{
               fontFamily: 'Montserrat',
@@ -392,7 +545,7 @@ export default function OTP() {
               cursor: 'pointer',
               fontSize: '14px',
             }}
-            onClick={() => console.log('Resend OTP')}
+            onClick={handleResend}
           >
             Resend
           </button>
@@ -432,5 +585,23 @@ export default function OTP() {
         </div>
       </div>
     </PageTransition>
+  );
+}
+
+export default function OTP() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontFamily: 'Montserrat, sans-serif'
+      }}>
+        Loading...
+      </div>
+    }>
+      <OTPContent />
+    </Suspense>
   );
 }
