@@ -1091,20 +1091,21 @@ export default function SignUp() {
             }}
           />
               {agreeToTerms && (
-                <div
+                <svg
+                  viewBox="0 0 12 12"
                   style={{
                     position: 'absolute',
                     top: '50%',
                     left: '4px',
-                    width: '6px',
+                    width: '10px',
                     height: '10px',
-                    border: 'solid #03A9F5',
-                    borderWidth: '0 0 3px 3px',
-                    transform: 'translateY(-50%) rotate(-45deg)',
+                    transform: 'translateY(-50%)',
                     pointerEvents: 'none',
-                    borderRadius: '1px',
                   }}
-                />
+                  aria-hidden="true"
+                >
+                  <polyline points="1.5 6.5 4.5 9 10 2" fill="none" stroke="#03A9F5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               )}
           <span style={{ lineHeight: '20px' }}>
             I agree to the{' '}
