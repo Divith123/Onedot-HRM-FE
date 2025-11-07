@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+
+
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Rectangle } from '../../../../components/pages/auth/ui';
@@ -8,7 +10,7 @@ import PageTransition from '../../../../components/animations/PageTransition';
 import authService from '@/services/auth.service';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function OTP() {
+function OTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -577,5 +579,23 @@ export default function OTP() {
         </div>
       </div>
     </PageTransition>
+  );
+}
+
+export default function OTP() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontFamily: 'Montserrat, sans-serif'
+      }}>
+        Loading...
+      </div>
+    }>
+      <OTPContent />
+    </Suspense>
   );
 }
