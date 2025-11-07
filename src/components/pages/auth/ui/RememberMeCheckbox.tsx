@@ -12,6 +12,7 @@ export const RememberMeCheckbox: React.FC<RememberMeCheckboxProps> = ({
   return (
     <label
       style={{
+        position: 'relative',
         display: 'flex',
         alignItems: 'center',
         cursor: 'pointer',
@@ -36,25 +37,27 @@ export const RememberMeCheckbox: React.FC<RememberMeCheckboxProps> = ({
           cursor: 'pointer',
           background: 'transparent',
           appearance: 'none',
-          position: 'relative',
           outline: 'none',
+          display: 'inline-block',
+          verticalAlign: 'middle',
         }}
       />
       {checked && (
-        <div
+        <svg
+          viewBox="0 0 12 12"
           style={{
             position: 'absolute',
-            top: '3px',
-            left: '3px',
+            top: '50%',
+            left: '4px',
             width: '10px',
-            height: '8px',
-            border: 'solid #03A9F5',
-            borderWidth: '0 0 3px 3px',
-            transform: 'rotate(-45deg)',
+            height: '10px',
+            transform: 'translateY(-50%)',
             pointerEvents: 'none',
-            borderRadius: '1px',
           }}
-        />
+          aria-hidden="true"
+        >
+          <polyline points="1.5 6.5 4.5 9 10 2" fill="none" stroke="#03A9F5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       )}
       <span>Remember me</span>
     </label>
