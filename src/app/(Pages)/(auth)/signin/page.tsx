@@ -110,7 +110,8 @@ export default function SignIn() {
             flexDirection: 'column',
             padding: '30px 20px',
             paddingBottom: '50px',
-            overflow: 'auto',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {/* Logo */}
