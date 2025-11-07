@@ -1,7 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import PageTransition from '../../../../components/animations/PageTransition';
+import { Rectangle } from '../../../../components/pages/auth/ui/Rectangle';
 import {
   EmailInput,
   PasswordInput,
@@ -12,8 +15,10 @@ import {
   ForgotPasswordLink,
   OrDivider
 } from '../../../../components/pages/auth/ui';
+import authService from '@/services/auth.service';
 
 export default function SignUp() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,12 +26,443 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [isResponsive, setIsResponsive] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    setIsMounted(true);
+    const handleResize = () => {
+      setIsResponsive(window.innerWidth < 1024);
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ name, email, password, confirmPassword, agreeToTerms });
+
+    // Validation
+    if (!name.trim()) {
+      toast.error('Please enter your full name');
+      return;
+    }
+
+    if (name.trim().length < 2) {
+      toast.error('Full name must be at least 2 characters');
+      return;
+    }
+
+    if (!email.trim()) {
+      toast.error('Please enter your email');
+      return;
+    }
+
+    if (!password) {
+      toast.error('Please enter a password');
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (!agreeToTerms) {
+      toast.error('Please agree to the Terms & Conditions');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await authService.signup({
+        fullName: name.trim(),
+        email: email.trim(),
+        password: password,
+      });
+
+      if (response.success) {
+        toast.success(response.message || 'Account created successfully! Please check your email for verification code.');
+
+        // Store email temporarily for verification page
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('verificationEmail', email.trim());
+        }
+
+        // Redirect to OTP page with verification type
+        setTimeout(() => {
+          router.push('/otp?type=verification');
+        }, 1500);
+      } else {
+        toast.error(response.message || 'Failed to create account');
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
+
+      // Handle error response
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error('An error occurred during signup. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+
+  if (!isMounted) {
+    return null;
+  }
+
+  // Mobile/Tablet Layout (< 1024px)
+  if (isResponsive) {
+    return (
+      <PageTransition>
+        <div
+          style={{
+            width: '100vw',
+            minHeight: '100vh',
+            background: '#FFFFFF',
+            fontFamily: 'Montserrat, sans-serif',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '30px 20px',
+            paddingBottom: '50px',
+            overflow: 'auto',
+          }}
+        >
+          {/* Logo */}
+          <img
+            src="/onedot-large.svg"
+            alt="OneDot"
+            style={{
+              height: 'auto',
+              width: '100px',
+              marginBottom: '20px',
+              alignSelf: 'flex-start',
+            }}
+          />
+
+          {/* Title */}
+          <h1
+            style={{
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: 700,
+              fontSize: 'clamp(28px, 6vw, 40px)',
+              lineHeight: '120%',
+              color: '#171923',
+              marginBottom: '8px',
+            }}
+          >
+            Create Account
+          </h1>
+
+          {/* Subtitle */}
+          <div
+            style={{
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              fontSize: 'clamp(13px, 3vw, 16px)',
+              lineHeight: '150%',
+              color: '#718096',
+              marginBottom: '30px',
+              display: 'flex',
+              gap: '4px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <span>Already have an account?</span>
+            <a
+              href="/signin"
+              style={{
+                fontFamily: 'Montserrat',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                fontSize: 'clamp(13px, 3vw, 16px)',
+                lineHeight: '150%',
+                color: '#1C4532',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+              }}
+            >
+              Login Here
+            </a>
+          </div>
+
+          {/* Form Container */}
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px',
+            }}
+          >
+            {/* Name Input */}
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <label
+                style={{
+                  fontFamily: 'Montserrat',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  fontSize: 'clamp(12px, 3vw, 16px)',
+                  lineHeight: '20px',
+                  letterSpacing: '-0.154px',
+                  color: '#718096',
+                }}
+              >
+                Full Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{
+                  width: '100%',
+                  minHeight: '44px',
+                  background: '#F7FAFC',
+                  border: '1px solid #CBD5E0',
+                  boxShadow: 'inset 0px 2px 0px rgba(231, 235, 238, 0.2)',
+                  borderRadius: '10px',
+                  padding: '10px 12px',
+                  fontFamily: 'Montserrat',
+                  fontSize: 'clamp(12px, 3vw, 16px)',
+                  lineHeight: '20px',
+                  color: '#4A5568',
+                  letterSpacing: '-0.154px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#03A9F5';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#CBD5E0';
+                }}
+                required
+              />
+            </div>
+
+            {/* Email Input */}
+            <EmailInput 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              isResponsive={true}
+            />
+
+            {/* Password Input */}
+            <PasswordInput
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+              isResponsive={true}
+            />
+
+            {/* Confirm Password Input */}
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+              }}
+            >
+              <label
+                style={{
+                  fontFamily: 'Montserrat',
+                  fontStyle: 'normal',
+                  fontWeight: 500,
+                  fontSize: 'clamp(12px, 3vw, 16px)',
+                  lineHeight: '20px',
+                  letterSpacing: '-0.154px',
+                  color: '#718096',
+                }}
+              >
+                Confirm Password
+              </label>
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  style={{
+                    width: '100%',
+                    minHeight: '44px',
+                    background: '#F7FAFC',
+                    border: '1px solid #CBD5E0',
+                    boxShadow: 'inset 0px 2px 0px rgba(231, 235, 238, 0.2)',
+                    borderRadius: '10px',
+                    padding: '10px 48px 10px 12px',
+                    fontFamily: 'Montserrat',
+                    fontSize: 'clamp(12px, 3vw, 16px)',
+                    lineHeight: '20px',
+                    color: '#4A5568',
+                    letterSpacing: '-0.154px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = '#03A9F5';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = '#CBD5E0';
+                  }}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    right: '12px',
+                    width: '24px',
+                    height: '24px',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {showConfirmPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#718096" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#718096" strokeWidth="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Terms & Sign Up */}
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                fontFamily: 'Montserrat',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                fontSize: 'clamp(12px, 3vw, 16px)',
+                lineHeight: '20px',
+                color: '#718096',
+                gap: '8px',
+                marginTop: '8px',
+                position: 'relative',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={agreeToTerms}
+                onChange={(e) => setAgreeToTerms(e.target.checked)}
+                style={{
+                  minWidth: '16px',
+                  minHeight: '16px',
+                  border: '1px solid #CFD9E0',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  background: 'transparent',
+                  appearance: 'none',
+                  position: 'relative',
+                  outline: 'none',
+                }}
+              />
+              {agreeToTerms && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '8px',
+                    left: '8px',
+                    width: '10px',
+                    height: '8px',
+                    border: 'solid #03A9F5',
+                    borderWidth: '0 0 3px 3px',
+                    transform: 'rotate(-45deg)',
+                    pointerEvents: 'none',
+                    borderRadius: '1px',
+                  }}
+                />
+              )}
+              <span>I agree to the Terms & Conditions</span>
+            </label>
+
+            {/* Sign Up Button */}
+            <button
+              onClick={handleSubmit}
+              style={{
+                width: '100%',
+                minHeight: '44px',
+                border: 'none',
+                borderRadius: '10px',
+                background: '#FFDE17',
+                fontFamily: 'Montserrat',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                fontSize: 'clamp(14px, 3vw, 18px)',
+                lineHeight: '28px',
+                color: '#FFFFFF',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#E6C814';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#FFDE17';
+              }}
+            >
+              Create Account
+            </button>
+
+            {/* OR Divider */}
+            <OrDivider isResponsive={true} />
+
+            {/* Google Button */}
+            <GoogleButton isResponsive={true} />
+
+            {/* GitHub Button */}
+            <GitHubButton isResponsive={true} />
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
+  // Desktop Layout (>= 1024px) - Original design
   return (
     <PageTransition>
       <div
@@ -36,6 +472,7 @@ export default function SignUp() {
           height: '100vh',
           background: '#FFFFFF',
           fontFamily: 'Montserrat, sans-serif',
+          overflow: 'hidden',
         }}
       >
       {/* Blue Rectangle Decoration */}
@@ -608,6 +1045,7 @@ export default function SignUp() {
       {/* Sign Up Button */}
       <button
         onClick={handleSubmit}
+        disabled={isLoading}
         style={{
           position: 'absolute',
           width: '27.5%',
@@ -616,24 +1054,25 @@ export default function SignUp() {
           top: '62%',
           border: 'none',
           borderRadius: '10px',
-          background: '#FFDE17',
+          background: isLoading ? '#CBD5E0' : '#FFDE17',
           fontFamily: 'Montserrat',
           fontStyle: 'normal',
           fontWeight: 500,
           fontSize: 'clamp(14px, 1.7vh, 18px)',
           lineHeight: '28px',
           color: '#FFFFFF',
-          cursor: 'pointer',
+          cursor: isLoading ? 'not-allowed' : 'pointer',
           transition: 'background-color 0.2s',
+          opacity: isLoading ? 0.7 : 1,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#E6C814';
+          if (!isLoading) e.currentTarget.style.background = '#E6C814';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = '#FFDE17';
+          if (!isLoading) e.currentTarget.style.background = '#FFDE17';
         }}
       >
-        Create Account
+        {isLoading ? 'Creating Account...' : 'Create Account'}
       </button>
 
       {/* OR Divider */}
