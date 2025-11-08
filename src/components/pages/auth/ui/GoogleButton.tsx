@@ -1,12 +1,64 @@
+'use client';
+
 import React from 'react';
+import { useGoogleLogin } from '@react-oauth/google';
+import authService from '@/services/auth.service';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 interface GoogleButtonProps {
   isResponsive?: boolean;
+  onSuccess?: () => void;
+  onError?: (error: string) => void;
 }
 
-export const GoogleButton: React.FC<GoogleButtonProps> = ({ isResponsive }) => {
+export const GoogleButton: React.FC<GoogleButtonProps> = ({
+  isResponsive,
+  onSuccess,
+  onError
+}) => {
+  const router = useRouter();
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (credentialResponse) => {
+      try {
+        // For Google, we send the ID token (credential) to our backend
+        const response = await authService.externalLogin({
+          provider: 'google',
+          accessToken: credentialResponse.access_token,
+        });
+
+        if (response.success) {
+          toast.success(response.message || 'Login successful!');
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            // Default redirect to setup-org page
+            router.push('/setup-org');
+          }
+        } else {
+          const errorMsg = response.message || 'Google login failed';
+          toast.error(errorMsg);
+          if (onError) onError(errorMsg);
+        }
+      } catch (error: any) {
+        const errorMsg = error?.response?.data?.message || 'Google login failed. Please try again.';
+        toast.error(errorMsg);
+        console.error('Google login error:', error);
+        if (onError) onError(errorMsg);
+      }
+    },
+    onError: () => {
+      const errorMsg = 'Google login failed';
+      toast.error(errorMsg);
+      console.error('Google login error');
+      if (onError) onError(errorMsg);
+    },
+  });
+
   return (
     <button
+      onClick={() => handleGoogleLogin()}
       style={isResponsive ? {
         width: '100%',
         border: '1.5px solid #E2E8F0',

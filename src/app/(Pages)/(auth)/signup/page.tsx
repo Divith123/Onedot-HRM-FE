@@ -16,6 +16,7 @@ import {
   ForgotPasswordLink,
   OrDivider
 } from '../../../../components/pages/auth/ui';
+import { GoogleOAuthProviderWrapper } from '@/components/providers/GoogleOAuthProvider';
 export default function SignUp() {
   const router = useRouter();
   const [name, setName] = useState('');
@@ -129,21 +130,22 @@ export default function SignUp() {
   // Mobile/Tablet Layout (< 1024px)
   if (isResponsive) {
     return (
-      <PageTransition>
-        <div
-          style={{
-            width: '100vw',
-            minHeight: '100vh',
-            background: '#FFFFFF',
-            fontFamily: 'Montserrat, sans-serif',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '30px 20px',
-            paddingBottom: '50px',
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
+      <GoogleOAuthProviderWrapper>
+        <PageTransition>
+          <div
+            style={{
+              width: '100vw',
+              minHeight: '100vh',
+              background: '#FFFFFF',
+              fontFamily: 'Montserrat, sans-serif',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '30px 20px',
+              paddingBottom: '50px',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
           {/* Logo */}
           <img
             src="/onedot-large.svg"
@@ -525,12 +527,14 @@ export default function SignUp() {
           </div>
         </div>
       </PageTransition>
+      </GoogleOAuthProviderWrapper>
     );
   }
 
   // Desktop Layout (>= 1024px) - Original design
   return (
-    <PageTransition>
+    <GoogleOAuthProviderWrapper>
+      <PageTransition>
       <div
         className="relative"
         style={{
@@ -1323,5 +1327,6 @@ export default function SignUp() {
 
     </div>
     </PageTransition>
+    </GoogleOAuthProviderWrapper>
   );
 }

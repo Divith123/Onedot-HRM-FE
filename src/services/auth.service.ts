@@ -7,6 +7,7 @@ import {
   VerifyOtpRequest,
   ResetPasswordRequest,
   RefreshTokenRequest,
+  ExternalAuthRequest,
   AuthResponse,
 } from '@/types/api.types';
 
@@ -41,6 +42,22 @@ class AuthService {
    */
   async signin(data: SigninRequest): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/auth/signin', data);
+
+    // Save tokens and user data to localStorage
+    if (response.data.success && response.data.token) {
+      this.saveAuthData(response.data);
+    }
+
+    return response.data;
+  }
+
+  /**
+   * External OAuth login (Google/GitHub)
+   * Automatically creates or links user account
+   * Returns JWT tokens for authenticated session
+   */
+  async externalLogin(data: ExternalAuthRequest): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/external-login', data);
 
     // Save tokens and user data to localStorage
     if (response.data.success && response.data.token) {
@@ -118,7 +135,7 @@ class AuthService {
   /**
    * Save authentication data to localStorage
    */
-  private saveAuthData(data: AuthResponse): void {
+  saveAuthData(data: AuthResponse): void {
     if (typeof window !== 'undefined') {
       if (data.token) {
         localStorage.setItem('accessToken', data.token);
