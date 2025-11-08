@@ -6,34 +6,34 @@ import api from '@/services/api';
 import authService from '@/services/auth.service';
 import { useToast } from '@/components/providers/ToastProvider';
 
-function GitHubCallbackContent() {
+function LinkedInCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
-    const handleGitHubCallback = async () => {
+    const handleLinkedInCallback = async () => {
       try {
         // Get authorization code from URL
         const code = searchParams.get('code');
         const error = searchParams.get('error');
 
         if (error) {
-          showToast({ variant: 'error', message: 'GitHub authorization was denied' });
+          showToast({ variant: 'error', message: 'LinkedIn authorization was denied' });
           router.push('/signin');
           return;
         }
 
         if (!code) {
-          showToast({ variant: 'error', message: 'No authorization code received from GitHub' });
+          showToast({ variant: 'error', message: 'No authorization code received from LinkedIn' });
           router.push('/signin');
           return;
         }
 
         // Send authorization code to backend
         // Backend will securely exchange it for access token and authenticate user
-        const response = await api.post('/auth/github-callback', {
+        const response = await api.post('/auth/linkedin-callback', {
           Code: code,  // Capital C to match backend DTO
         });
 
@@ -46,12 +46,12 @@ function GitHubCallbackContent() {
           showToast({ variant: 'success', message: response.data.message || 'Login successful!' });
           router.push('/setup-org');
         } else {
-          showToast({ variant: 'error', message: response.data.message || 'GitHub login failed' });
+          showToast({ variant: 'error', message: response.data.message || 'LinkedIn login failed' });
           router.push('/signin');
         }
       } catch (error: any) {
-        console.error('GitHub callback error:', error);
-        const errorMsg = error?.response?.data?.message || 'GitHub login failed. Please try again.';
+        console.error('LinkedIn callback error:', error);
+        const errorMsg = error?.response?.data?.message || 'LinkedIn login failed. Please try again.';
         showToast({ variant: 'error', message: errorMsg });
         router.push('/signin');
       } finally {
@@ -59,7 +59,7 @@ function GitHubCallbackContent() {
       }
     };
 
-    handleGitHubCallback();
+    handleLinkedInCallback();
   }, [searchParams, router]);
 
   return (
@@ -85,7 +85,7 @@ function GitHubCallbackContent() {
         color: '#1A202C',
         fontWeight: 500,
       }}>
-        {isProcessing ? 'Completing GitHub login...' : 'Redirecting...'}
+        {isProcessing ? 'Completing LinkedIn login...' : 'Redirecting...'}
       </p>
       <style jsx>{`
         @keyframes spin {
@@ -97,7 +97,7 @@ function GitHubCallbackContent() {
   );
 }
 
-export default function GitHubCallbackPage() {
+export default function LinkedInCallbackPage() {
   return (
     <Suspense fallback={
       <div style={{
@@ -126,7 +126,7 @@ export default function GitHubCallbackPage() {
         </p>
       </div>
     }>
-      <GitHubCallbackContent />
+      <LinkedInCallbackContent />
     </Suspense>
   );
 }

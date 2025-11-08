@@ -13,6 +13,7 @@ import {
   OrDivider,
   Rectangle
 } from '../../../../components/pages/auth/ui';
+import { LinkedInButton } from '../../../../components/pages/auth/ui/LinkedInButton';
 import PageTransition from '../../../../components/animations/PageTransition';
 import authService from '@/services/auth.service';
 import { useAuth } from '@/contexts/AuthContext';
@@ -235,6 +236,9 @@ export default function SignIn() {
 
             {/* GitHub Button */}
             <GitHubButton isResponsive={true} />
+
+            {/* LinkedIn Button */}
+            <LinkedInButton isResponsive={true} />
           </div>
           </div>
         </PageTransition>
@@ -378,6 +382,9 @@ export default function SignIn() {
 
         {/* GitHub Button */}
         <GitHubButton isResponsive={false} />
+
+        {/* LinkedIn Button */}
+        <LinkedInButton isResponsive={false} />
 
         {/* Support Label (no button) */}
         <div
