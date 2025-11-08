@@ -51,6 +51,7 @@ function OTPContent() {
   const [isResponsive, setIsResponsive] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
+  
   useEffect(() => {
     setIsMounted(true);
     const checkResponsive = () => {
