@@ -4,16 +4,17 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import toast from 'react-hot-toast';
 import { Rectangle } from '../../../../components/pages/auth/ui';
 import PageTransition from '../../../../components/animations/PageTransition';
 import authService from '@/services/auth.service';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/components/providers/ToastProvider';
 
 function OTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
+  const { showToast } = useToast();
 
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -32,7 +33,7 @@ function OTPContent() {
         if (verificationEmail) {
           setEmail(verificationEmail);
         } else {
-          toast.error('No email found. Please sign up first.');
+          showToast({ variant: 'error', message: 'No email found. Please sign up first.' });
           router.push('/signup');
         }
       } else {
@@ -42,7 +43,7 @@ function OTPContent() {
         if (resetEmail) {
           setEmail(resetEmail);
         } else {
-          toast.error('No email found. Please start the password reset process again.');
+          showToast({ variant: 'error', message: 'No email found. Please start the password reset process again.' });
           router.push('/forgot-password');
         }
       }
@@ -86,7 +87,7 @@ function OTPContent() {
     const otpValue = otp.join('');
 
     if (otpValue.length !== 6) {
-      toast.error('Please enter all 6 digits');
+      showToast({ variant: 'error', message: 'Please enter all 6 digits' });
       return;
     }
 
@@ -101,7 +102,7 @@ function OTPContent() {
         });
 
         if (response.success && response.user) {
-          toast.success(response.message || 'Email verified successfully!');
+          showToast({ variant: 'success', message: response.message || 'Email verified successfully!' });
 
           // Login user
           login(response.user);
@@ -114,7 +115,7 @@ function OTPContent() {
             router.push('/setup-org');
           }, 1000);
         } else {
-          toast.error(response.message || 'Invalid verification code');
+          showToast({ variant: 'error', message: response.message || 'Invalid verification code' });
         }
       } else {
         // Password reset OTP verification flow
@@ -124,25 +125,25 @@ function OTPContent() {
         });
 
         if (response.success) {
-          toast.success(response.message || 'OTP verified successfully!');
+          showToast({ variant: 'success', message: response.message || 'OTP verified successfully!' });
 
           // Redirect to reset password page
           setTimeout(() => {
             router.push('/reset-password');
           }, 1000);
         } else {
-          toast.error(response.message || 'Invalid OTP');
+          showToast({ variant: 'error', message: response.message || 'Invalid OTP' });
         }
       }
     } catch (error: any) {
       console.error('OTP verification error:', error);
 
       if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+        showToast({ variant: 'error', message: error.response.data.message });
       } else if (error.message) {
-        toast.error(error.message);
+        showToast({ variant: 'error', message: error.message });
       } else {
-        toast.error('An error occurred. Please try again.');
+        showToast({ variant: 'error', message: 'An error occurred. Please try again.' });
       }
     } finally {
       setIsLoading(false);
@@ -151,14 +152,14 @@ function OTPContent() {
 
   const handleResend = async () => {
     if (otpType === 'verification') {
-      toast.success('Resend verification code feature coming soon. Please check your email.');
+      showToast({ variant: 'success', message: 'Resend verification code feature coming soon. Please check your email.' });
     } else {
       // Resend OTP for password reset
       try {
         await authService.forgotPassword({ email });
-        toast.success('New OTP sent to your email!');
+        showToast({ variant: 'success', message: 'New OTP sent to your email!' });
       } catch (error) {
-        toast.error('Failed to resend OTP. Please try again.');
+        showToast({ variant: 'error', message: 'Failed to resend OTP. Please try again.' });
       }
     }
   };

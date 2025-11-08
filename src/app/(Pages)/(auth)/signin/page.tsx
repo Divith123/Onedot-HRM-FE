@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
 import {
   EmailInput,
   PasswordInput,
@@ -18,10 +17,12 @@ import PageTransition from '../../../../components/animations/PageTransition';
 import authService from '@/services/auth.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { GoogleOAuthProviderWrapper } from '@/components/providers/GoogleOAuthProvider';
+import { useToast } from '@/components/providers/ToastProvider';
 
 export default function SignIn() {
   const router = useRouter();
   const { login } = useAuth();
+  const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -46,12 +47,12 @@ export default function SignIn() {
 
     // Validation
     if (!email.trim()) {
-      toast.error('Please enter your email');
+      showToast({ variant: 'error', message: 'Please enter your email' });
       return;
     }
 
     if (!password) {
-      toast.error('Please enter your password');
+      showToast({ variant: 'error', message: 'Please enter your password' });
       return;
     }
 
@@ -64,7 +65,7 @@ export default function SignIn() {
       });
 
       if (response.success && response.user) {
-        toast.success(response.message || 'Login successful!');
+        showToast({ variant: 'success', message: response.message || 'Login successful!' });
 
         // Login user
         login(response.user);
@@ -74,18 +75,18 @@ export default function SignIn() {
           router.push('/setup-org');
         }, 1000);
       } else {
-        toast.error(response.message || 'Failed to sign in');
+        showToast({ variant: 'error', message: response.message || 'Failed to sign in' });
       }
     } catch (error: any) {
       console.error('Signin error:', error);
 
       // Handle error response
       if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+        showToast({ variant: 'error', message: error.response.data.message });
       } else if (error.message) {
-        toast.error(error.message);
+        showToast({ variant: 'error', message: error.message });
       } else {
-        toast.error('An error occurred during sign in. Please try again.');
+        showToast({ variant: 'error', message: 'An error occurred during sign in. Please try again.' });
       }
     } finally {
       setIsLoading(false);
@@ -235,13 +236,13 @@ export default function SignIn() {
             {/* GitHub Button */}
             <GitHubButton isResponsive={true} />
           </div>
-        </div>
-      </PageTransition>
+          </div>
+        </PageTransition>
       </GoogleOAuthProviderWrapper>
     );
   }
 
-  // Desktop Layout (>= 1024px) - Original design
+  // Desktop Layout (1024px and above) - Original design
   return (
     <GoogleOAuthProviderWrapper>
       <PageTransition>
@@ -411,7 +412,7 @@ export default function SignIn() {
           </span>
         </div>
       </div>
-    </PageTransition>
+      </PageTransition>
     </GoogleOAuthProviderWrapper>
   );
 }
