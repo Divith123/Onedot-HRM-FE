@@ -16,6 +16,7 @@ import {
   ForgotPasswordLink,
   OrDivider
 } from '../../../../components/pages/auth/ui';
+import { LinkedInButton } from '../../../../components/pages/auth/ui/LinkedInButton';
 import { GoogleOAuthProviderWrapper } from '@/components/providers/GoogleOAuthProvider';
 export default function SignUp() {
   const router = useRouter();
@@ -524,6 +525,9 @@ export default function SignUp() {
 
             {/* GitHub Button */}
             <GitHubButton isResponsive={true} />
+
+            {/* LinkedIn Button */}
+            <LinkedInButton isResponsive={true} />
           </div>
         </div>
       </PageTransition>
@@ -1324,6 +1328,9 @@ export default function SignUp() {
         </svg>
         <span>GitHub</span>
       </button>
+
+      {/* LinkedIn Button */}
+      <LinkedInButton isResponsive={false} />
 
     </div>
     </PageTransition>

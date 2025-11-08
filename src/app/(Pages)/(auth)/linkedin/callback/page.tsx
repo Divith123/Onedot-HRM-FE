@@ -6,33 +6,33 @@ import toast from 'react-hot-toast';
 import api from '@/services/api';
 import authService from '@/services/auth.service';
 
-function GitHubCallbackContent() {
+function LinkedInCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
-    const handleGitHubCallback = async () => {
+    const handleLinkedInCallback = async () => {
       try {
         // Get authorization code from URL
         const code = searchParams.get('code');
         const error = searchParams.get('error');
 
         if (error) {
-          toast.error('GitHub authorization was denied');
+          toast.error('LinkedIn authorization was denied');
           router.push('/signin');
           return;
         }
 
         if (!code) {
-          toast.error('No authorization code received from GitHub');
+          toast.error('No authorization code received from LinkedIn');
           router.push('/signin');
           return;
         }
 
         // Send authorization code to backend
         // Backend will securely exchange it for access token and authenticate user
-        const response = await api.post('/auth/github-callback', {
+        const response = await api.post('/auth/linkedin-callback', {
           Code: code,  // Capital C to match backend DTO
         });
 
@@ -45,12 +45,12 @@ function GitHubCallbackContent() {
           toast.success(response.data.message || 'Login successful!');
           router.push('/setup-org');
         } else {
-          toast.error(response.data.message || 'GitHub login failed');
+          toast.error(response.data.message || 'LinkedIn login failed');
           router.push('/signin');
         }
       } catch (error: any) {
-        console.error('GitHub callback error:', error);
-        const errorMsg = error?.response?.data?.message || 'GitHub login failed. Please try again.';
+        console.error('LinkedIn callback error:', error);
+        const errorMsg = error?.response?.data?.message || 'LinkedIn login failed. Please try again.';
         toast.error(errorMsg);
         router.push('/signin');
       } finally {
@@ -58,7 +58,7 @@ function GitHubCallbackContent() {
       }
     };
 
-    handleGitHubCallback();
+    handleLinkedInCallback();
   }, [searchParams, router]);
 
   return (
@@ -84,7 +84,7 @@ function GitHubCallbackContent() {
         color: '#1A202C',
         fontWeight: 500,
       }}>
-        {isProcessing ? 'Completing GitHub login...' : 'Redirecting...'}
+        {isProcessing ? 'Completing LinkedIn login...' : 'Redirecting...'}
       </p>
       <style jsx>{`
         @keyframes spin {
@@ -96,7 +96,7 @@ function GitHubCallbackContent() {
   );
 }
 
-export default function GitHubCallbackPage() {
+export default function LinkedInCallbackPage() {
   return (
     <Suspense fallback={
       <div style={{
@@ -125,7 +125,7 @@ export default function GitHubCallbackPage() {
         </p>
       </div>
     }>
-      <GitHubCallbackContent />
+      <LinkedInCallbackContent />
     </Suspense>
   );
 }
