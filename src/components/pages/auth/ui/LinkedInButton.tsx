@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { initiateLinkedInLogin } from '@/utils/linkedinOAuth';
-import toast from 'react-hot-toast';
+import { useToast } from '@/components/providers/ToastProvider';
 
 interface LinkedInButtonProps {
   isResponsive?: boolean;
@@ -13,12 +13,14 @@ export const LinkedInButton: React.FC<LinkedInButtonProps> = ({
   isResponsive,
   onError
 }) => {
+  const { showToast } = useToast();
+
   const handleLinkedInLogin = () => {
     try {
       initiateLinkedInLogin();
     } catch (error: any) {
       const errorMsg = error?.message || 'LinkedIn login failed. Please try again.';
-      toast.error(errorMsg);
+      showToast({ variant: 'error', message: errorMsg });
       console.error('LinkedIn login error:', error);
       if (onError) onError(errorMsg);
     }
