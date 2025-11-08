@@ -42,6 +42,12 @@ const GraphIcon = () => (
 );
 
 const ActivityCard: React.FC<ActivityCardProps> = ({ className, items }) => {
+  const [isVisible, setIsVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   const defaultItems: ActivityItem[] = [
     {
       label: 'Projects',
@@ -74,21 +80,27 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ className, items }) => {
   return (
     <div
       className={cn(
-        'relative w-full max-w-[568px] h-[88px] bg-white rounded-2xl border border-transparent shadow-lg',
+        'w-full bg-white border border-[#e8e8ea] shadow-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 transition-all duration-700',
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
         className,
       )}
-      style={{
-        boxShadow: '0px 18px 32px 0px rgba(208, 210, 218, 0.15)',
-      }}
     >
-      <div className="flex items-center justify-between h-full px-6">
+      {/* Items Container with View All Button inline */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 sm:gap-x-6 sm:gap-y-4 md:gap-x-8 lg:gap-x-10">
         {displayItems.map((item, index) => (
           <React.Fragment key={index}>
             {/* Item Container */}
-            <div className="flex items-center gap-3">
+            <div 
+              className={`flex items-center gap-2 sm:gap-2.5 md:gap-3 transition-all duration-500`}
+              style={{ 
+                transitionDelay: `${200 + index * 100}ms`,
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateX(0)' : 'translateX(-20px)'
+              }}
+            >
               {/* Icon Background */}
               <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center opacity-65 shrink-0"
+                className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transform hover:scale-110 hover:rotate-3 transition-all duration-300"
                 style={{ backgroundColor: item.bgColor }}
               >
                 {item.icon}
@@ -96,17 +108,28 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ className, items }) => {
 
               {/* Text Container */}
               <div className="flex flex-col">
-                <span className="text-[#92959e] text-xs font-semibold">{item.label}</span>
-                <span className="text-[#15192c] text-sm font-normal mt-0.5">{item.value}</span>
+                <span className="text-[#92959e] text-[11px] sm:text-xs md:text-sm font-medium leading-tight">{item.label}</span>
+                <span className="text-[#15192c] text-sm sm:text-base md:text-lg font-bold mt-0.5 sm:mt-1">{item.value}</span>
               </div>
             </div>
 
-            {/* Divider */}
+            {/* Divider - Show between items on larger screens */}
             {index < displayItems.length - 1 && (
-              <div className="h-[55px] w-px bg-[#ececee]" />
+              <div className="hidden lg:block h-12 w-px bg-[#e8e8ea] animate-[fadeIn_0.5s_ease-in]" />
             )}
           </React.Fragment>
         ))}
+
+        {/* View All Button - Inline with stats, pushes to right */}
+        <button 
+          className={`flex items-center gap-1 sm:gap-1.5 text-[#03a9f5] text-xs sm:text-sm font-semibold hover:text-[#0288d1] transition-all duration-300 cursor-pointer ml-auto hover:gap-2 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+          style={{ transitionDelay: '600ms' }}
+        >
+          <span>View All</span>
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform hover:translate-x-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
   );

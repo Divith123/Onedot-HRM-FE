@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 
 interface TrendOverviewCardProps {
   className?: string;
-  // simple numeric series to render the trend; if not provided a default sample is used
   data?: number[];
   title?: string;
   subtitle?: string;
+  percentage?: string;
 }
 
 // helper: build an SVG path from a numeric array
@@ -32,19 +32,40 @@ function buildLinePath(values: number[], w: number, h: number, padX: number, pad
 const TrendOverviewCard: React.FC<TrendOverviewCardProps> = ({
   className,
   data,
-  title = "Trend Overview",
-  subtitle = "Last 30 days",
+  title = "AI Improvements",
+  percentage = "156 %",
 }) => {
+  const [isVisible, setIsVisible] = React.useState(false);
+  const lineRef = React.useRef<SVGPathElement>(null);
+
+  React.useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (lineRef.current) {
+      const pathLength = lineRef.current.getTotalLength();
+      lineRef.current.style.strokeDasharray = `${pathLength}`;
+      lineRef.current.style.strokeDashoffset = `${pathLength}`;
+      
+      // Trigger animation
+      setTimeout(() => {
+        if (lineRef.current) {
+          lineRef.current.style.strokeDashoffset = '0';
+        }
+      }, 200);
+    }
+  }, []);
+
   const series =
     data && data.length > 0
       ? data
-      : [120, 136, 150, 140, 160, 174, 168, 180, 170, 185, 175, 190];
+      : [120, 140, 135, 155, 145, 165, 160, 175, 170, 185, 180, 195, 190, 205, 200, 215];
 
-  // adjusted for medium card: 294px wide, 147px tall for graph
-  const viewW = 294;
-  const viewH = 147;
-  const padX = 19;
-  const padY = 29;
+  const viewW = 280;
+  const viewH = 120;
+  const padX = 15;
+  const padY = 15;
 
   const { d: lineD, points } = buildLinePath(series, viewW, viewH, padX, padY);
 
@@ -56,58 +77,80 @@ const TrendOverviewCard: React.FC<TrendOverviewCardProps> = ({
         } ${viewH - padY} L ${points[0].x} ${viewH - padY} Z`
       : "";
 
-  // last point highlight
-  const lastPoint = points[points.length - 1];
-
   return (
     <div
       className={cn(
-        "w-[294px] h-[185px] rounded-[20px] border-2 border-[#f5effc] bg-white",
+        "w-full bg-white rounded-xl sm:rounded-2xl border border-[#e8e8ea] shadow-sm p-4 sm:p-5 md:p-6 transition-all duration-700",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
         className,
       )}
     >
-      <div className="flex items-start justify-between px-2 py-1">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-4 sm:mb-5">
         <div>
-          <h3 className="text-xs font-semibold text-slate-900">{title}</h3>
-          <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
+          <h3 className="text-sm sm:text-base md:text-lg font-bold text-[#111827]">{title}</h3>
         </div>
-        <div className="text-right">
-          <div className="text-sm font-bold text-slate-900">{series[series.length - 1]}</div>
-          <div className="text-xs text-slate-500">Active</div>
+        <div 
+          className={cn(
+            "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 bg-[#e8f5e9] rounded-lg transition-all duration-500",
+            isVisible ? "opacity-100 scale-100" : "opacity-0 scale-75"
+          )}
+          style={{ transitionDelay: '300ms' }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="sm:w-3.5 sm:h-3.5 animate-[bounce_2s_ease-in-out_infinite]">
+            <path d="M12 19V5M5 12l7-7 7 7" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span className="text-xs sm:text-sm font-bold text-[#10b981]">{percentage}</span>
         </div>
       </div>
 
-      <div className="mt-1 h-[147px]">
+      {/* Chart */}
+      <div className="h-[100px] sm:h-[120px] md:h-[140px]">
         <svg viewBox={`0 0 ${viewW} ${viewH}`} className="w-full h-full">
           <defs>
-            <linearGradient id="td-grad" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#03A9F5" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#03A9F5" stopOpacity="0.08" />
+            <linearGradient id="ai-grad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#03A9F5" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#03A9F5" stopOpacity="0.05" />
             </linearGradient>
           </defs>
 
           {/* area under the curve */}
-          {areaD && <path d={areaD} fill="url(#td-grad)" />}
+          {areaD && (
+            <path 
+              d={areaD} 
+              fill="url(#ai-grad)"
+              className="transition-opacity duration-1000"
+              style={{ 
+                opacity: isVisible ? 1 : 0,
+                transitionDelay: '500ms'
+              }}
+            />
+          )}
 
           {/* main line */}
           {lineD && (
             <path
+              ref={lineRef}
               d={lineD}
               fill="none"
               stroke="#03A9F5"
-              strokeWidth={3}
+              strokeWidth={2.5}
               strokeLinejoin="round"
               strokeLinecap="round"
+              style={{
+                transition: 'stroke-dashoffset 2s ease-out',
+              }}
             />
           )}
-
-          {/* last point marker */}
-          {lastPoint && (
-            <g>
-              <circle cx={lastPoint.x} cy={lastPoint.y} r={6} fill="#03A9F5" stroke="#fff" strokeWidth={2} />
-            </g>
-          )}
         </svg>
+      </div>
+
+      {/* Legend or Additional Info */}
+      <div className="mt-5 pt-4 border-t border-[#e8e8ea]">
+        <div className="flex items-center justify-between text-xs lg:text-sm text-[#6b7280]">
+          <span>Performance Metrics</span>
+          <span className="font-semibold text-[#111827]">Trending Up</span>
+        </div>
       </div>
     </div>
   );
