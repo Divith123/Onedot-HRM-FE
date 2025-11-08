@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
 import authService from '@/services/auth.service';
 import PageTransition from '../../../../components/animations/PageTransition';
 import { Rectangle } from '../../../../components/pages/auth/ui/Rectangle';
@@ -18,8 +17,10 @@ import {
 } from '../../../../components/pages/auth/ui';
 import { LinkedInButton } from '../../../../components/pages/auth/ui/LinkedInButton';
 import { GoogleOAuthProviderWrapper } from '@/components/providers/GoogleOAuthProvider';
+import { useToast } from '@/components/providers/ToastProvider';
 export default function SignUp() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,37 +50,37 @@ export default function SignUp() {
 
     // Validation
     if (!name.trim()) {
-      toast.error('Please enter your full name');
+      showToast({ variant: 'error', message: 'Please enter your full name' });
       return;
     }
 
     if (name.trim().length < 2) {
-      toast.error('Full name must be at least 2 characters');
+      showToast({ variant: 'error', message: 'Full name must be at least 2 characters' });
       return;
     }
 
     if (!email.trim()) {
-      toast.error('Please enter your email');
+      showToast({ variant: 'error', message: 'Please enter your email' });
       return;
     }
 
     if (!password) {
-      toast.error('Please enter a password');
+      showToast({ variant: 'error', message: 'Please enter a password' });
       return;
     }
 
     if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      showToast({ variant: 'error', message: 'Password must be at least 6 characters' });
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      showToast({ variant: 'error', message: 'Passwords do not match' });
       return;
     }
 
     if (!agreeToTerms) {
-      toast.error('Please agree to the Terms & Conditions');
+      showToast({ variant: 'error', message: 'Please agree to the Terms & Conditions' });
       return;
     }
 
@@ -93,7 +94,7 @@ export default function SignUp() {
       });
 
       if (response.success) {
-        toast.success(response.message || 'Account created successfully! Please check your email for verification code.');
+        showToast({ variant: 'success', message: response.message || 'Account created successfully! Please check your email for verification code.' });
 
         // Store email temporarily for verification page
         if (typeof window !== 'undefined') {
@@ -105,18 +106,18 @@ export default function SignUp() {
           router.push('/otp?type=verification');
         }, 1500);
       } else {
-        toast.error(response.message || 'Failed to create account');
+        showToast({ variant: 'error', message: response.message || 'Failed to create account' });
       }
     } catch (error: any) {
       console.error('Signup error:', error);
 
       // Handle error response
       if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+        showToast({ variant: 'error', message: error.response.data.message });
       } else if (error.message) {
-        toast.error(error.message);
+        showToast({ variant: 'error', message: error.message });
       } else {
-        toast.error('An error occurred during signup. Please try again.');
+        showToast({ variant: 'error', message: 'An error occurred during signup. Please try again.' });
       }
     } finally {
       setIsLoading(false);
@@ -529,13 +530,13 @@ export default function SignUp() {
             {/* LinkedIn Button */}
             <LinkedInButton isResponsive={true} />
           </div>
-        </div>
-      </PageTransition>
+          </div>
+        </PageTransition>
       </GoogleOAuthProviderWrapper>
     );
   }
 
-  // Desktop Layout (>= 1024px) - Original design
+  // Desktop Layout (1024px and above) - Original design
   return (
     <GoogleOAuthProviderWrapper>
       <PageTransition>
@@ -1333,7 +1334,7 @@ export default function SignUp() {
       <LinkedInButton isResponsive={false} />
 
     </div>
-    </PageTransition>
+      </PageTransition>
     </GoogleOAuthProviderWrapper>
   );
 }

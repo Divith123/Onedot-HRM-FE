@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
 import PageTransition from '../../../../components/animations/PageTransition';
 import { Rectangle } from '../../../../components/pages/auth/ui/Rectangle';
 import authService from '@/services/auth.service';
+import { useToast } from '@/components/providers/ToastProvider';
 
 export default function ForgotPassword() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isResponsive, setIsResponsive] = useState(false);
@@ -31,7 +32,7 @@ export default function ForgotPassword() {
 
     // Validation
     if (!email.trim()) {
-      toast.error('Please enter your email');
+      showToast({ variant: 'error', message: 'Please enter your email' });
       return;
     }
 
@@ -43,7 +44,7 @@ export default function ForgotPassword() {
       });
 
       if (response.success) {
-        toast.success(response.message || 'OTP sent to your email. Please check your inbox.');
+        showToast({ variant: 'success', message: response.message || 'OTP sent to your email. Please check your inbox.' });
 
         // Store email temporarily for OTP verification
         if (typeof window !== 'undefined') {
@@ -55,17 +56,17 @@ export default function ForgotPassword() {
           router.push('/otp');
         }, 1500);
       } else {
-        toast.error(response.message || 'Failed to send OTP');
+        showToast({ variant: 'error', message: response.message || 'Failed to send OTP' });
       }
     } catch (error: any) {
       console.error('Forgot password error:', error);
 
       if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+        showToast({ variant: 'error', message: error.response.data.message });
       } else if (error.message) {
-        toast.error(error.message);
+        showToast({ variant: 'error', message: error.message });
       } else {
-        toast.error('An error occurred. Please try again.');
+        showToast({ variant: 'error', message: 'An error occurred. Please try again.' });
       }
     } finally {
       setIsLoading(false);
