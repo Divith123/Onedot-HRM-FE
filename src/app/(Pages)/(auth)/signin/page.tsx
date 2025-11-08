@@ -17,6 +17,7 @@ import {
 import PageTransition from '../../../../components/animations/PageTransition';
 import authService from '@/services/auth.service';
 import { useAuth } from '@/contexts/AuthContext';
+import { GoogleOAuthProviderWrapper } from '@/components/providers/GoogleOAuthProvider';
 
 export default function SignIn() {
   const router = useRouter();
@@ -99,20 +100,22 @@ export default function SignIn() {
   // Mobile/Tablet Layout (< 1024px)
   if (isResponsive) {
     return (
-      <PageTransition>
-        <div
-          style={{
-            width: '100vw',
-            minHeight: '100vh',
-            background: '#FFFFFF',
-            fontFamily: 'Montserrat, sans-serif',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '30px 20px',
-            paddingBottom: '50px',
-            overflow: 'auto',
-          }}
-        >
+      <GoogleOAuthProviderWrapper>
+        <PageTransition>
+          <div
+            style={{
+              width: '100vw',
+              minHeight: '100vh',
+              background: '#FFFFFF',
+              fontFamily: 'Montserrat, sans-serif',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '30px 20px',
+              paddingBottom: '50px',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
           {/* Logo */}
           <img
             src="/onedot-large.svg"
@@ -234,12 +237,14 @@ export default function SignIn() {
           </div>
         </div>
       </PageTransition>
+      </GoogleOAuthProviderWrapper>
     );
   }
 
   // Desktop Layout (>= 1024px) - Original design
   return (
-    <PageTransition>
+    <GoogleOAuthProviderWrapper>
+      <PageTransition>
       <div
         className="relative"
         style={{
@@ -407,5 +412,6 @@ export default function SignIn() {
         </div>
       </div>
     </PageTransition>
+    </GoogleOAuthProviderWrapper>
   );
 }

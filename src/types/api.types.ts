@@ -34,6 +34,11 @@ export interface RefreshTokenRequest {
   refreshToken: string;
 }
 
+export interface ExternalAuthRequest {
+  provider: 'google' | 'github';
+  accessToken: string;
+}
+
 // API Response Types
 export interface UserDto {
   id: number;
@@ -41,6 +46,9 @@ export interface UserDto {
   fullName: string;
   createdAt: string;
   lastLoginAt?: string;
+  profilePictureUrl?: string;
+  oAuthProvider?: string;
+  isEmailVerified?: boolean;
 }
 
 export interface AuthResponse {

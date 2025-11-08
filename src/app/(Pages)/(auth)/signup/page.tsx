@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import authService from '@/services/auth.service';
 import PageTransition from '../../../../components/animations/PageTransition';
 import { Rectangle } from '../../../../components/pages/auth/ui/Rectangle';
 import {
@@ -15,8 +16,7 @@ import {
   ForgotPasswordLink,
   OrDivider
 } from '../../../../components/pages/auth/ui';
-import authService from '@/services/auth.service';
-
+import { GoogleOAuthProviderWrapper } from '@/components/providers/GoogleOAuthProvider';
 export default function SignUp() {
   const router = useRouter();
   const [name, setName] = useState('');
@@ -26,6 +26,7 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [showTermsPreview, setShowTermsPreview] = useState(false);
   const [isResponsive, setIsResponsive] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -129,20 +130,22 @@ export default function SignUp() {
   // Mobile/Tablet Layout (< 1024px)
   if (isResponsive) {
     return (
-      <PageTransition>
-        <div
-          style={{
-            width: '100vw',
-            minHeight: '100vh',
-            background: '#FFFFFF',
-            fontFamily: 'Montserrat, sans-serif',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '30px 20px',
-            paddingBottom: '50px',
-            overflow: 'auto',
-          }}
-        >
+      <GoogleOAuthProviderWrapper>
+        <PageTransition>
+          <div
+            style={{
+              width: '100vw',
+              minHeight: '100vh',
+              background: '#FFFFFF',
+              fontFamily: 'Montserrat, sans-serif',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '30px 20px',
+              paddingBottom: '50px',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
           {/* Logo */}
           <img
             src="/onedot-large.svg"
@@ -390,34 +393,99 @@ export default function SignUp() {
                 checked={agreeToTerms}
                 onChange={(e) => setAgreeToTerms(e.target.checked)}
                 style={{
-                  minWidth: '16px',
-                  minHeight: '16px',
+                  width: '16px',
+                  height: '16px',
                   border: '1px solid #CFD9E0',
                   borderRadius: '4px',
                   cursor: 'pointer',
                   background: 'transparent',
                   appearance: 'none',
-                  position: 'relative',
+                  display: 'inline-block',
+                  verticalAlign: 'middle',
                   outline: 'none',
                 }}
               />
               {agreeToTerms && (
-                <div
+                <svg
+                  viewBox="0 0 12 12"
                   style={{
                     position: 'absolute',
-                    top: '8px',
-                    left: '8px',
+                    top: '50%',
+                    left: '4px',
                     width: '10px',
-                    height: '8px',
-                    border: 'solid #03A9F5',
-                    borderWidth: '0 0 3px 3px',
-                    transform: 'rotate(-45deg)',
+                    height: '10px',
+                    transform: 'translateY(-50%)',
                     pointerEvents: 'none',
-                    borderRadius: '1px',
                   }}
-                />
+                  aria-hidden="true"
+                >
+                  <polyline points="1.5 6.5 4.5 9 10 2" fill="none" stroke="#03A9F5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               )}
-              <span>I agree to the Terms & Conditions</span>
+              <span style={{ lineHeight: '20px' }}>
+                I agree to the{' '}
+                <span
+                  onClick={(e) => {
+                    // open small preview and auto-check the box while reading
+                    setShowTermsPreview(true);
+                    setAgreeToTerms(true);
+                    e.stopPropagation();
+                  }}
+                  style={{
+                    color: '#1C4532',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                >
+                  Terms &amp; Conditions
+                </span>
+              </span>
+
+              {/* Terms preview modal (centered) */}
+              {showTermsPreview && (
+                <>
+                  <div
+                    onClick={() => setShowTermsPreview(false)}
+                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.28)', zIndex: 49 }}
+                  />
+                  <div
+                    role="dialog"
+                    aria-modal="true"
+                    style={{
+                      position: 'fixed',
+                      left: '50%',
+                      top: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 50,
+                      width: 'calc(100% - 40px)',
+                      maxWidth: '520px',
+                      background: '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      boxShadow: '0 12px 30px rgba(2,6,23,0.12)',
+                      borderRadius: '10px',
+                      padding: '16px',
+                      fontSize: '14px',
+                      color: '#1A202C',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <strong style={{ fontSize: '15px' }}>Terms &amp; Conditions</strong>
+                      <button
+                        onClick={() => setShowTermsPreview(false)}
+                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#718096' }}
+                      >
+                        Close
+                      </button>
+                    </div>
+                    <ul style={{ margin: 0, paddingLeft: '18px', color: '#4A5568' }}>
+                      <li>We may send you account related emails.</li>
+                      <li>You accept our privacy policy and data processing rules.</li>
+                      <li>Accounts must follow our community guidelines.</li>
+                    </ul>
+                  </div>
+                </>
+              )}
             </label>
 
             {/* Sign Up Button */}
@@ -459,12 +527,14 @@ export default function SignUp() {
           </div>
         </div>
       </PageTransition>
+      </GoogleOAuthProviderWrapper>
     );
   }
 
   // Desktop Layout (>= 1024px) - Original design
   return (
-    <PageTransition>
+    <GoogleOAuthProviderWrapper>
+      <PageTransition>
       <div
         className="relative"
         style={{
@@ -1004,6 +1074,7 @@ export default function SignUp() {
             lineHeight: '20px',
             color: '#718096',
             gap: '8px',
+            position: 'relative',
           }}
         >
           <input
@@ -1018,27 +1089,81 @@ export default function SignUp() {
               cursor: 'pointer',
               background: 'transparent',
               appearance: 'none',
-              position: 'relative',
+              display: 'inline-block',
+              verticalAlign: 'middle',
               outline: 'none',
             }}
           />
-          {agreeToTerms && (
+              {agreeToTerms && (
+                <svg
+                  viewBox="0 0 12 12"
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '4px',
+                    width: '10px',
+                    height: '10px',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                  }}
+                  aria-hidden="true"
+                >
+                  <polyline points="1.5 6.5 4.5 9 10 2" fill="none" stroke="#03A9F5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+          <span style={{ lineHeight: '20px' }}>
+            I agree to the{' '}
+            <span
+              onClick={(e) => {
+                setShowTermsPreview(true);
+                setAgreeToTerms(true);
+                e.stopPropagation();
+              }}
+              style={{
+                color: '#1C4532',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                fontWeight: 500,
+              }}
+            >
+              Terms &amp; Conditions
+            </span>
+          </span>
+
+          {/* Small preview (desktop) */}
+          {showTermsPreview && (
             <div
               style={{
                 position: 'absolute',
-                top: '3px',
-                left: '3px',
-                width: '10px',
-                height: '8px',
-                border: 'solid #03A9F5',
-                borderWidth: '0 0 3px 3px',
-                transform: 'rotate(-45deg)',
-                pointerEvents: 'none',
-                borderRadius: '1px',
+                left: '0',
+                top: '36px',
+                zIndex: 50,
+                width: '27.5vw',
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 6px 18px rgba(2,6,23,0.08)',
+                borderRadius: '8px',
+                padding: '12px',
+                fontSize: '14px',
+                color: '#1A202C',
               }}
-            />
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <strong style={{ fontSize: '14px' }}>Terms &amp; Conditions</strong>
+                <button
+                  onClick={() => setShowTermsPreview(false)}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#718096' }}
+                >
+                  Close
+                </button>
+              </div>
+              <ul style={{ margin: 0, paddingLeft: '18px', color: '#4A5568' }}>
+                <li>We may send you account related emails.</li>
+                <li>You accept our privacy policy and data processing rules.</li>
+                <li>Accounts must follow our community guidelines.</li>
+              </ul>
+            </div>
           )}
-          <span>I agree to the Terms & Conditions</span>
         </label>
       </div>
 
@@ -1202,5 +1327,6 @@ export default function SignUp() {
 
     </div>
     </PageTransition>
+    </GoogleOAuthProviderWrapper>
   );
 }

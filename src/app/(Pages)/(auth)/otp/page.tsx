@@ -183,7 +183,8 @@ function OTPContent() {
             flexDirection: 'column',
             padding: '30px 20px',
             paddingBottom: '50px',
-            overflow: 'auto',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {/* Logo */}
@@ -428,7 +429,13 @@ function OTPContent() {
         {/* Info text based on type */}
         <p
           style={{
+            position: 'absolute',
+            width: '18.2%',
+            height: '2.5%',
+            left: '17.7%',
+            top: '28.5%',
             fontFamily: 'Montserrat',
+            fontStyle: 'normal',
             fontWeight: 400,
             fontSize: 'clamp(12px, 1.3vw, 14px)',
             color: '#A0AEC0',
