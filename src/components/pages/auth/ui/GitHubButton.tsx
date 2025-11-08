@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { initiateGitHubLogin } from '@/utils/githubOAuth';
-import toast from 'react-hot-toast';
+import { useToast } from '@/components/providers/ToastProvider';
 
 interface GitHubButtonProps {
   isResponsive?: boolean;
@@ -13,12 +13,14 @@ export const GitHubButton: React.FC<GitHubButtonProps> = ({
   isResponsive,
   onError
 }) => {
+  const { showToast } = useToast();
+
   const handleGitHubLogin = () => {
     try {
       initiateGitHubLogin();
     } catch (error: any) {
       const errorMsg = error?.message || 'GitHub login failed. Please try again.';
-      toast.error(errorMsg);
+      showToast({ variant: 'error', message: errorMsg });
       console.error('GitHub login error:', error);
       if (onError) onError(errorMsg);
     }

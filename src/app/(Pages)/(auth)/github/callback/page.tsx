@@ -2,13 +2,14 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import toast from 'react-hot-toast';
 import api from '@/services/api';
 import authService from '@/services/auth.service';
+import { useToast } from '@/components/providers/ToastProvider';
 
 function GitHubCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
   const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
@@ -19,13 +20,13 @@ function GitHubCallbackContent() {
         const error = searchParams.get('error');
 
         if (error) {
-          toast.error('GitHub authorization was denied');
+          showToast({ variant: 'error', message: 'GitHub authorization was denied' });
           router.push('/signin');
           return;
         }
 
         if (!code) {
-          toast.error('No authorization code received from GitHub');
+          showToast({ variant: 'error', message: 'No authorization code received from GitHub' });
           router.push('/signin');
           return;
         }
@@ -42,16 +43,16 @@ function GitHubCallbackContent() {
             authService.saveAuthData(response.data);
           }
 
-          toast.success(response.data.message || 'Login successful!');
+          showToast({ variant: 'success', message: response.data.message || 'Login successful!' });
           router.push('/setup-org');
         } else {
-          toast.error(response.data.message || 'GitHub login failed');
+          showToast({ variant: 'error', message: response.data.message || 'GitHub login failed' });
           router.push('/signin');
         }
       } catch (error: any) {
         console.error('GitHub callback error:', error);
         const errorMsg = error?.response?.data?.message || 'GitHub login failed. Please try again.';
-        toast.error(errorMsg);
+        showToast({ variant: 'error', message: errorMsg });
         router.push('/signin');
       } finally {
         setIsProcessing(false);

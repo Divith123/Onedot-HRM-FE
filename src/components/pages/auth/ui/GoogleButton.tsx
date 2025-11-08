@@ -3,8 +3,8 @@
 import React from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import authService from '@/services/auth.service';
-import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/providers/ToastProvider';
 
 interface GoogleButtonProps {
   isResponsive?: boolean;
@@ -18,6 +18,7 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
   onError
 }) => {
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (credentialResponse) => {
@@ -29,7 +30,7 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
         });
 
         if (response.success) {
-          toast.success(response.message || 'Login successful!');
+          showToast({ variant: 'success', message: response.message || 'Login successful!' });
           if (onSuccess) {
             onSuccess();
           } else {
@@ -38,19 +39,19 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
           }
         } else {
           const errorMsg = response.message || 'Google login failed';
-          toast.error(errorMsg);
+          showToast({ variant: 'error', message: errorMsg });
           if (onError) onError(errorMsg);
         }
       } catch (error: any) {
         const errorMsg = error?.response?.data?.message || 'Google login failed. Please try again.';
-        toast.error(errorMsg);
+        showToast({ variant: 'error', message: errorMsg });
         console.error('Google login error:', error);
         if (onError) onError(errorMsg);
       }
     },
     onError: () => {
       const errorMsg = 'Google login failed';
-      toast.error(errorMsg);
+      showToast({ variant: 'error', message: errorMsg });
       console.error('Google login error');
       if (onError) onError(errorMsg);
     },
