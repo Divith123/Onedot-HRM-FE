@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import api from '@/services/api';
+import authService from '@/services/auth.service';
 
 function GitHubCallbackContent() {
   const router = useRouter();
@@ -36,18 +37,9 @@ function GitHubCallbackContent() {
         });
 
         if (response.data.success) {
-          // Save tokens to localStorage
+          // Save tokens and user data using authService
           if (response.data.token) {
-            localStorage.setItem('accessToken', response.data.token);
-          }
-          if (response.data.refreshToken) {
-            localStorage.setItem('refreshToken', response.data.refreshToken);
-          }
-          if (response.data.user) {
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-          }
-          if (response.data.tokenExpiry) {
-            localStorage.setItem('tokenExpiry', response.data.tokenExpiry);
+            authService.saveAuthData(response.data);
           }
 
           toast.success(response.data.message || 'Login successful!');

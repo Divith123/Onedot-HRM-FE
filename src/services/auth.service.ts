@@ -135,7 +135,7 @@ class AuthService {
   /**
    * Save authentication data to localStorage
    */
-  private saveAuthData(data: AuthResponse): void {
+  saveAuthData(data: AuthResponse): void {
     if (typeof window !== 'undefined') {
       if (data.token) {
         localStorage.setItem('accessToken', data.token);
