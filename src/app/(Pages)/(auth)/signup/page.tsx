@@ -526,13 +526,13 @@ export default function SignUp() {
             {/* GitHub Button */}
             <GitHubButton isResponsive={true} />
           </div>
-        </div>
-      </PageTransition>
+          </div>
+        </PageTransition>
       </GoogleOAuthProviderWrapper>
     );
   }
 
-  // Desktop Layout (>= 1024px) - Original design
+  // Desktop Layout (1024px and above) - Original design
   return (
     <GoogleOAuthProviderWrapper>
       <PageTransition>
@@ -1327,7 +1327,7 @@ export default function SignUp() {
       </button>
 
     </div>
-    </PageTransition>
+      </PageTransition>
     </GoogleOAuthProviderWrapper>
   );
 }
