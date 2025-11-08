@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
 import PageTransition from '../../../../components/animations/PageTransition';
 import { Rectangle } from '../../../../components/pages/auth/ui/Rectangle';
 import { PasswordInput } from '../../../../components/pages/auth/ui';
 import authService from '@/services/auth.service';
+import { useToast } from '@/components/providers/ToastProvider';
 
 export default function ResetPassword() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -26,7 +27,7 @@ export default function ResetPassword() {
       if (storedEmail) {
         setEmail(storedEmail);
       } else {
-        toast.error('Session expired. Please start the password reset process again.');
+        showToast({ variant: 'error', message: 'Session expired. Please start the password reset process again.' });
         router.push('/forgot-password');
       }
     }
@@ -49,17 +50,17 @@ export default function ResetPassword() {
 
     // Validation
     if (!newPassword) {
-      toast.error('Please enter a new password');
+      showToast({ variant: 'error', message: 'Please enter a new password' });
       return;
     }
 
     if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      showToast({ variant: 'error', message: 'Password must be at least 6 characters' });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match');
+      showToast({ variant: 'error', message: 'Passwords do not match' });
       return;
     }
 
@@ -72,7 +73,7 @@ export default function ResetPassword() {
       });
 
       if (response.success) {
-        toast.success(response.message || 'Password reset successfully!');
+        showToast({ variant: 'success', message: response.message || 'Password reset successfully!' });
 
         // Clear session storage
         sessionStorage.removeItem('resetEmail');
@@ -82,17 +83,17 @@ export default function ResetPassword() {
           router.push('/signin');
         }, 1500);
       } else {
-        toast.error(response.message || 'Failed to reset password');
+        showToast({ variant: 'error', message: response.message || 'Failed to reset password' });
       }
     } catch (error: any) {
       console.error('Reset password error:', error);
 
       if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
+        showToast({ variant: 'error', message: error.response.data.message });
       } else if (error.message) {
-        toast.error(error.message);
+        showToast({ variant: 'error', message: error.message });
       } else {
-        toast.error('An error occurred. Please try again.');
+        showToast({ variant: 'error', message: 'An error occurred. Please try again.' });
       }
     } finally {
       setIsLoading(false);
