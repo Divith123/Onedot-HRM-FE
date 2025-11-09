@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import authService from '@/services/auth.service';
 import PageTransition from '../../../../components/animations/PageTransition';
 import { Rectangle } from '../../../../components/pages/auth/ui/Rectangle';
@@ -18,8 +19,10 @@ import {
 import { LinkedInButton } from '../../../../components/pages/auth/ui/LinkedInButton';
 import { GoogleOAuthProviderWrapper } from '@/components/providers/GoogleOAuthProvider';
 import { useToast } from '@/components/providers/ToastProvider';
+
 export default function SignUp() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const { showToast } = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -43,7 +46,92 @@ export default function SignUp() {
     
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Redirect authenticated users to dashboard immediately
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      console.log('User already authenticated, redirecting to dashboard...');
+      router.push('/dashboard');
+    }
+  }, [status, session, router]);
+
   const [isLoading, setIsLoading] = useState(false);
+
+  // Show loading while checking authentication status
+  if (status === 'loading' || !isMounted) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        flexDirection: 'column',
+        gap: '20px',
+        fontFamily: 'Montserrat, sans-serif',
+        background: '#FFFFFF',
+      }}>
+        <div style={{
+          width: '50px',
+          height: '50px',
+          border: '3px solid #E2E8F0',
+          borderTop: '3px solid #03A9F5',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+        }} />
+        <p style={{
+          fontSize: '18px',
+          color: '#1A202C',
+          fontWeight: 500,
+        }}>
+          Checking authentication...
+        </p>
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // If user is authenticated, show redirecting message
+  if (status === 'authenticated') {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        flexDirection: 'column',
+        gap: '20px',
+        fontFamily: 'Montserrat, sans-serif',
+        background: '#FFFFFF',
+      }}>
+        <div style={{
+          width: '50px',
+          height: '50px',
+          border: '3px solid #E2E8F0',
+          borderTop: '3px solid #03A9F5',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+        }} />
+        <p style={{
+          fontSize: '18px',
+          color: '#1A202C',
+          fontWeight: 500,
+        }}>
+          Redirecting to dashboard...
+        </p>
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
