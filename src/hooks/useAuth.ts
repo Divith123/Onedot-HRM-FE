@@ -7,13 +7,13 @@
 'use client';
 
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { useCallback } from 'react';
+import type { Session } from 'next-auth';
 
 interface UseAuthReturn {
-  session: any;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: any;
+  user: Session['user'] | null;
   signIn: typeof signIn;
   signOut: typeof signOut;
 }
@@ -28,7 +28,7 @@ export function useAuth(): UseAuthReturn {
     session,
     isAuthenticated,
     isLoading,
-    user: session?.user,
+    user: session?.user ?? null,
     signIn,
     signOut,
   };

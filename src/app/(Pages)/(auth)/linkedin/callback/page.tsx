@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import api from '@/services/api';
 import authService from '@/services/auth.service';
 import { useToast } from '@/components/providers/ToastProvider';
@@ -44,7 +45,27 @@ function LinkedInCallbackContent() {
           }
 
           showToast({ variant: 'success', message: response.data.message || 'Login successful!' });
-          router.push('/dashboard');
+
+          // Create NextAuth session for OAuth user
+          // This creates a JWT token in NextAuth so middleware can validate the session
+          const sessionResult = await signIn('credentials', {
+            email: response.data.user?.email || 'oauth@user.local',
+            token: response.data.token,
+            refreshToken: response.data.refreshToken,
+            user: JSON.stringify(response.data.user),
+            redirect: false,
+          });
+
+          if (!sessionResult?.error) {
+            // Wait for NextAuth session to be established
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 300);
+          } else {
+            console.error('NextAuth session creation failed:', sessionResult.error);
+            // Still redirect even if NextAuth fails, but localStorage auth will work
+            router.push('/dashboard');
+          }
         } else {
           showToast({ variant: 'error', message: response.data.message || 'LinkedIn login failed' });
           router.push('/signin');

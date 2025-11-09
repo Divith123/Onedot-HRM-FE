@@ -61,7 +61,6 @@ function GitHubCallbackContent() {
               router.push('/dashboard');
             }, 300);
           } else {
-            console.error('NextAuth session creation failed:', sessionResult.error);
             // Still redirect even if NextAuth fails, but localStorage auth will work
             router.push('/dashboard');
           }
@@ -70,7 +69,6 @@ function GitHubCallbackContent() {
           router.push('/signin');
         }
       } catch (error: any) {
-        console.error('GitHub callback error:', error);
         const errorMsg = error?.response?.data?.message || 'GitHub login failed. Please try again.';
         showToast({ variant: 'error', message: errorMsg });
         router.push('/signin');

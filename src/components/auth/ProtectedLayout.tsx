@@ -16,7 +16,7 @@ interface ProtectedLayoutProps {
 }
 
 export function ProtectedLayout({ children }: ProtectedLayoutProps) {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
 

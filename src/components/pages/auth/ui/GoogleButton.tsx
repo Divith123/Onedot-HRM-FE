@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
+import { signIn } from 'next-auth/react';
 import authService from '@/services/auth.service';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/providers/ToastProvider';
@@ -31,10 +32,29 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
 
         if (response.success) {
           showToast({ variant: 'success', message: response.message || 'Login successful!' });
-          if (onSuccess) {
-            onSuccess();
+
+          // Ensure NextAuth session is created like the GitHub flow does.
+          // This mirrors the server-side token-based login into NextAuth so
+          // useSession() will report 'authenticated' for client-side guards.
+          const sessionResult = await signIn('credentials', {
+            email: response.user?.email || 'oauth@user.local',
+            token: response.token,
+            refreshToken: response.refreshToken,
+            user: JSON.stringify(response.user),
+            redirect: false,
+          });
+
+          if (!sessionResult?.error) {
+            if (onSuccess) {
+              onSuccess();
+            }
+            // Wait a moment for NextAuth to settle then navigate
+            setTimeout(() => router.push('/dashboard'), 300);
           } else {
-            // Default redirect to dashboard page
+            // If NextAuth session creation failed, still navigate since local
+            // tokens are stored and app can use them; but show an error toast.
+            const errMsg = sessionResult?.error || 'Failed to create session';
+            showToast({ variant: 'error', message: errMsg });
             router.push('/dashboard');
           }
         } else {

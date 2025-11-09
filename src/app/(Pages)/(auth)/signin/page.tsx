@@ -47,7 +47,6 @@ export default function SignIn() {
   // Redirect authenticated users to dashboard immediately
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
-      console.log('User already authenticated, redirecting to dashboard...');
       router.push('/dashboard');
     }
   }, [status, session, router]);
@@ -153,20 +152,16 @@ export default function SignIn() {
         redirect: false, // Don't redirect automatically, handle it manually
       });
 
-      console.log('SignIn result:', result);
-
       if (result?.error) {
         console.error('Signin error:', result.error);
         showToast({ variant: 'error', message: 'Invalid email or password. Please try again.' });
         setIsLoading(false);
       } else {
         // If there's no error, login was successful
-        console.log('Login successful, redirecting to dashboard...');
         showToast({ variant: 'success', message: 'Login successful!' });
         
         // Wait a moment for NextAuth to update session, then redirect
         setTimeout(() => {
-          console.log('Executing redirect to /dashboard');
           router.push('/dashboard');
         }, 300);
       }
