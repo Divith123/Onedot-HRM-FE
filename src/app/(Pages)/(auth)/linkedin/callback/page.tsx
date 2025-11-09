@@ -44,7 +44,7 @@ function LinkedInCallbackContent() {
           }
 
           showToast({ variant: 'success', message: response.data.message || 'Login successful!' });
-          router.push('/setup-org');
+          router.push('/dashboard');
         } else {
           showToast({ variant: 'error', message: response.data.message || 'LinkedIn login failed' });
           router.push('/signin');

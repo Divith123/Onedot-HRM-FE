@@ -2,14 +2,16 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { ProtectedLayout } from '@/components/auth/ProtectedLayout';
 import PageTransition from '@/components/animations/PageTransition';
 
 export default function SetupPage() {
   const router = useRouter();
 
   return (
-    <PageTransition>
-      <div className="relative w-full h-screen bg-white overflow-hidden flex flex-col items-center justify-center" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+    <ProtectedLayout>
+      <PageTransition>
+        <div className="relative w-full h-screen bg-white overflow-hidden flex flex-col items-center justify-center" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <div className="absolute w-[100px] h-5 left-7 top-7">
         <Image
           src="/onedot-large.svg"
@@ -73,5 +75,6 @@ export default function SetupPage() {
       </div>
       </div>
     </PageTransition>
+    </ProtectedLayout>
   );
 }

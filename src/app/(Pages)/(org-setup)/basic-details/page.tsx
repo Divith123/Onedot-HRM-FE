@@ -15,6 +15,7 @@ import {
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import { ProtectedLayout } from '@/components/auth/ProtectedLayout';
 
 // Lazy load ReactCrop component
 const ReactCrop = dynamic(() => import('react-image-crop').then(mod => ({ default: mod.ReactCrop })), {
@@ -221,7 +222,8 @@ export default function BasicDetailsPage() {
   // Validation for Next button
   const isNextEnabled = organizationName.trim() !== '' && organizationDomain.trim() !== '';
   return (
-    <PageTransition>
+    <ProtectedLayout>
+      <PageTransition>
       <div className="relative w-full min-h-screen bg-white flex flex-col items-center justify-center" style={{ fontFamily: 'Montserrat, sans-serif' }}>
       <div className="absolute w-[100px] h-5 left-7 top-7">
         <Image
@@ -525,5 +527,6 @@ export default function BasicDetailsPage() {
 
       </div>
     </PageTransition>
+    </ProtectedLayout>
   );
 }

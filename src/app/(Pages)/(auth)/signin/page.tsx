@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
 import {
   EmailInput,
   PasswordInput,
@@ -22,6 +23,7 @@ import { useToast } from '@/components/providers/ToastProvider';
 
 export default function SignIn() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const { login } = useAuth();
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
@@ -41,7 +43,92 @@ export default function SignIn() {
     window.addEventListener('resize', checkResponsive);
     return () => window.removeEventListener('resize', checkResponsive);
   }, []);
+
+  // Redirect authenticated users to dashboard immediately
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      console.log('User already authenticated, redirecting to dashboard...');
+      router.push('/dashboard');
+    }
+  }, [status, session, router]);
+
   const [isLoading, setIsLoading] = useState(false);
+
+  // Show loading while checking authentication status
+  if (status === 'loading' || !isMounted) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        flexDirection: 'column',
+        gap: '20px',
+        fontFamily: 'Montserrat, sans-serif',
+        background: '#FFFFFF',
+      }}>
+        <div style={{
+          width: '50px',
+          height: '50px',
+          border: '3px solid #E2E8F0',
+          borderTop: '3px solid #03A9F5',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+        }} />
+        <p style={{
+          fontSize: '18px',
+          color: '#1A202C',
+          fontWeight: 500,
+        }}>
+          Checking authentication...
+        </p>
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // If user is authenticated, show redirecting message
+  if (status === 'authenticated') {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        flexDirection: 'column',
+        gap: '20px',
+        fontFamily: 'Montserrat, sans-serif',
+        background: '#FFFFFF',
+      }}>
+        <div style={{
+          width: '50px',
+          height: '50px',
+          border: '3px solid #E2E8F0',
+          borderTop: '3px solid #03A9F5',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+        }} />
+        <p style={{
+          fontSize: '18px',
+          color: '#1A202C',
+          fontWeight: 500,
+        }}>
+          Redirecting to dashboard...
+        </p>
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,36 +147,32 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      const response = await authService.signin({
+      const result = await signIn("credentials", {
         email: email.trim(),
         password: password,
+        redirect: false, // Don't redirect automatically, handle it manually
       });
 
-      if (response.success && response.user) {
-        showToast({ variant: 'success', message: response.message || 'Login successful!' });
+      console.log('SignIn result:', result);
 
-        // Login user
-        login(response.user);
-
-        // Redirect to dashboard or setup page
-        setTimeout(() => {
-          router.push('/setup-org');
-        }, 1000);
+      if (result?.error) {
+        console.error('Signin error:', result.error);
+        showToast({ variant: 'error', message: 'Invalid email or password. Please try again.' });
+        setIsLoading(false);
       } else {
-        showToast({ variant: 'error', message: response.message || 'Failed to sign in' });
+        // If there's no error, login was successful
+        console.log('Login successful, redirecting to dashboard...');
+        showToast({ variant: 'success', message: 'Login successful!' });
+        
+        // Wait a moment for NextAuth to update session, then redirect
+        setTimeout(() => {
+          console.log('Executing redirect to /dashboard');
+          router.push('/dashboard');
+        }, 300);
       }
     } catch (error: any) {
-      console.error('Signin error:', error);
-
-      // Handle error response
-      if (error.response?.data?.message) {
-        showToast({ variant: 'error', message: error.response.data.message });
-      } else if (error.message) {
-        showToast({ variant: 'error', message: error.message });
-      } else {
-        showToast({ variant: 'error', message: 'An error occurred during sign in. Please try again.' });
-      }
-    } finally {
+      console.error('Signin catch error:', error);
+      showToast({ variant: 'error', message: 'An error occurred during sign in. Please try again.' });
       setIsLoading(false);
     }
   };
