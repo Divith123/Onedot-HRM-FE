@@ -34,8 +34,8 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
           if (onSuccess) {
             onSuccess();
           } else {
-            // Default redirect to setup-org page
-            router.push('/setup-org');
+            // Default redirect to dashboard page
+            router.push('/dashboard');
           }
         } else {
           const errorMsg = response.message || 'Google login failed';

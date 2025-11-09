@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import AnimatePresenceWrapper from "../components/animations/AnimatePresenceWrapper";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/components/providers/ToastProvider";
+import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -41,13 +42,15 @@ export default function RootLayout({
         className={`${montserrat.variable} antialiased`}
         suppressHydrationWarning
       >
-        <AuthProvider>
-          <ToastProvider>
-            <AnimatePresenceWrapper>
-              {children}
-            </AnimatePresenceWrapper>
-          </ToastProvider>
-        </AuthProvider>
+        <SessionProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <AnimatePresenceWrapper>
+                {children}
+              </AnimatePresenceWrapper>
+            </ToastProvider>
+          </AuthProvider>
+        </SessionProvider>
       </body>
     </html>
   );

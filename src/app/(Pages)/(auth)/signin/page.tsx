@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import {
   EmailInput,
   PasswordInput,
@@ -60,36 +61,32 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      const response = await authService.signin({
+      const result = await signIn("credentials", {
         email: email.trim(),
         password: password,
+        redirect: false, // Don't redirect automatically, handle it manually
       });
 
-      if (response.success && response.user) {
-        showToast({ variant: 'success', message: response.message || 'Login successful!' });
+      console.log('SignIn result:', result);
 
-        // Login user
-        login(response.user);
-
-        // Redirect to dashboard or setup page
-        setTimeout(() => {
-          router.push('/setup-org');
-        }, 1000);
+      if (result?.error) {
+        console.error('Signin error:', result.error);
+        showToast({ variant: 'error', message: 'Invalid email or password. Please try again.' });
+        setIsLoading(false);
       } else {
-        showToast({ variant: 'error', message: response.message || 'Failed to sign in' });
+        // If there's no error, login was successful
+        console.log('Login successful, redirecting to dashboard...');
+        showToast({ variant: 'success', message: 'Login successful!' });
+        
+        // Wait a moment for NextAuth to update session, then redirect
+        setTimeout(() => {
+          console.log('Executing redirect to /dashboard');
+          router.push('/dashboard');
+        }, 300);
       }
     } catch (error: any) {
-      console.error('Signin error:', error);
-
-      // Handle error response
-      if (error.response?.data?.message) {
-        showToast({ variant: 'error', message: error.response.data.message });
-      } else if (error.message) {
-        showToast({ variant: 'error', message: error.message });
-      } else {
-        showToast({ variant: 'error', message: 'An error occurred during sign in. Please try again.' });
-      }
-    } finally {
+      console.error('Signin catch error:', error);
+      showToast({ variant: 'error', message: 'An error occurred during sign in. Please try again.' });
       setIsLoading(false);
     }
   };

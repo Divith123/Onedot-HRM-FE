@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PageTransition from '@/components/animations/PageTransition';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ProtectedLayout } from '@/components/auth/ProtectedLayout';
 
 export default function OrgPreferencePage() {
   const router = useRouter();
@@ -26,7 +27,8 @@ export default function OrgPreferencePage() {
   ];
 
   return (
-    <PageTransition>
+    <ProtectedLayout>
+      <PageTransition>
       <div className="relative w-full min-h-screen bg-white flex flex-col items-center justify-center" style={{ fontFamily: 'Montserrat, sans-serif' }}>
         {/* Logo */}
         <div className="absolute w-[100px] h-5 left-7 top-7">
@@ -146,5 +148,6 @@ export default function OrgPreferencePage() {
         </div>
       </div>
     </PageTransition>
+    </ProtectedLayout>
   );
 }
