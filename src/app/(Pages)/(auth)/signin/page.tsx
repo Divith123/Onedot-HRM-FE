@@ -309,14 +309,43 @@ export default function SignIn() {
             {/* OR Divider */}
             <OrDivider isResponsive={true} />
 
-            {/* Google Button */}
-            <GoogleButton isResponsive={true} />
+            {/* Sign in with text */}
+            <div
+              style={{
+                width: '100%',
+                textAlign: 'center',
+                marginTop: '16px',
+                marginBottom: '16px',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'Montserrat',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  fontSize: 'clamp(14px, 2vw, 16px)',
+                  lineHeight: '150%',
+                  color: '#718096',
+                }}
+              >
+                Sign in with
+              </span>
+            </div>
 
-            {/* GitHub Button */}
-            <GitHubButton isResponsive={true} />
-
-            {/* LinkedIn Button */}
-            <LinkedInButton isResponsive={true} />
+            {/* OAuth Buttons Row */}
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '16px',
+              }}
+            >
+              <GoogleButton variant="circle" />
+              <GitHubButton variant="circle" />
+              <LinkedInButton variant="circle" />
+            </div>
           </div>
           </div>
         </PageTransition>
@@ -455,14 +484,47 @@ export default function SignIn() {
         {/* OR Divider */}
         <OrDivider isResponsive={false} />
 
-        {/* Google Button */}
-        <GoogleButton isResponsive={false} />
+        {/* Sign in with text */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '17.7%',
+            top: '70%',
+            width: '27.5%',
+            textAlign: 'center',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              fontSize: 'clamp(14px, 1.5vh, 16px)',
+              lineHeight: '150%',
+              color: '#718096',
+            }}
+          >
+            Sign in with
+          </span>
+        </div>
 
-        {/* GitHub Button */}
-        <GitHubButton isResponsive={false} />
-
-        {/* LinkedIn Button */}
-        <LinkedInButton isResponsive={false} />
+        {/* OAuth Buttons Row */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '17.7%',
+            top: '78%',
+            width: '27.5%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '16px',
+          }}
+        >
+          <GoogleButton variant="circle" />
+          <GitHubButton variant="circle" />
+          <LinkedInButton variant="circle" />
+        </div>
 
         {/* Support Label (no button) */}
         <div
