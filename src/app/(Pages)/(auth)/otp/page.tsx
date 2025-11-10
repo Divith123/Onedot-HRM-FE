@@ -110,9 +110,9 @@ function OTPContent() {
           // Clear session storage
           sessionStorage.removeItem('verificationEmail');
 
-          // Redirect to dashboard or org setup
+          // Redirect to dashboard
           setTimeout(() => {
-            router.push('/setup-org');
+            router.push('/dashboard');
           }, 1000);
         } else {
           showToast({ variant: 'error', message: response.message || 'Invalid verification code' });
