@@ -3,6 +3,7 @@
 import React from 'react';
 import { ProtectedLayout } from '@/components/auth/ProtectedLayout';
 import Sidebar from '@/components/pages/common/Sidebar';
+import { Navbar } from '@/components/ui/navbar';
 import StatCard from '@/components/pages/job-portal/dashboard/Card';
 import TrendOverviewCard from '@/components/pages/job-portal/dashboard/TrendOverviewCard';
 import ProfileVisitorsCard from '@/components/pages/job-portal/dashboard/ProfileVisitorsCard';
@@ -48,9 +49,14 @@ export default function DashboardPage() {
         <Sidebar />
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto bg-[#fafbfc]">
-          <div className="w-full px-3 py-4 sm:px-4 sm:py-5 md:px-5 md:py-6 lg:px-6 lg:py-7 xl:px-8 xl:py-8 mx-auto max-w-[1600px]">
-            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-5">Dashboard</h1>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Top Navbar */}
+          <Navbar />
+
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-auto bg-[#fafbfc]">
+            <div className="w-full px-3 py-4 sm:px-4 sm:py-5 md:px-5 md:py-6 lg:px-6 lg:py-7 xl:px-8 xl:py-8 mx-auto max-w-[1600px]">
+              <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-5">Dashboard</h1>
           
           {/* Dashboard Layout */}
           <div className="flex flex-col xl:flex-row gap-3 sm:gap-4 md:gap-5">
@@ -90,8 +96,9 @@ export default function DashboardPage() {
               <TrendOverviewCard />
             </div>
           </div>
+            </div>
+          </main>
         </div>
-      </main>
       </div>
     </ProtectedLayout>
   );
