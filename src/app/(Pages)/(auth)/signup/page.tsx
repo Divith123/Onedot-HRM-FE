@@ -237,11 +237,11 @@ export default function SignUp() {
           >
           {/* Logo */}
           <img
-            src="/onedot-large.svg"
+            src="/onedot.svg"
             alt="OneDot"
             style={{
               height: 'auto',
-              width: '100px',
+              width: '140px',
               marginBottom: '20px',
               alignSelf: 'flex-start',
             }}
@@ -741,13 +741,13 @@ export default function SignUp() {
 
       {/* Logo */}
       <img
-        src="/onedot-large.svg"
+        src="/onedot.svg"
         alt="OneDot"
         style={{
             position: 'absolute',
             left: '57%',
           top: '8%',
-          height: '4.4vh',
+          height: '6vh',
           width: 'auto',
         }}
       />

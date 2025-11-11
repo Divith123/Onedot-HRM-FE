@@ -198,11 +198,11 @@ export default function SignIn() {
           >
           {/* Logo */}
           <img
-            src="/onedot-large.svg"
+            src="/onedot.svg"
             alt="OneDot"
             style={{
               height: 'auto',
-              width: '100px',
+              width: '140px',
               marginBottom: '20px',
               alignSelf: 'flex-start',
             }}
@@ -372,13 +372,13 @@ export default function SignIn() {
 
         {/* Logo */}
         <img
-          src="/onedot-large.svg"
+          src="/onedot.svg"
           alt="OneDot"
           style={{
             position: 'absolute',
-            left: '17.5%',
-            top: '13.9%',
-            height: '4.4vh',
+            left: '17.0%',
+            top: '13.5%',
+            height: '5vh',
             width: 'auto',
           }}
         />

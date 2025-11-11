@@ -27,7 +27,7 @@ export const metadata: Metadata = {
         type: "image/svg+xml",
       },
     ],
-    apple: "/onedot-large.svg",
+    apple: "/onedot.svg",
   },
 };
 
