@@ -17,16 +17,9 @@ interface ProtectedLayoutProps {
 
 export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const { status } = useSession();
-  const router = useRouter();
-  const [isReady, setIsReady] = useState(false);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/signin');
-    } else if (status === 'authenticated') {
-      setIsReady(true);
-    }
-  }, [status, router]);
+  // Don't redirect here - let middleware handle authentication redirects
+  // This component just shows loading or the content
 
   if (status === 'loading') {
     return (
@@ -64,9 +57,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
     );
   }
 
-  if (status === 'unauthenticated' || !isReady) {
-    return null;
-  }
-
+  // If authenticated, show children
+  // If not authenticated, middleware will redirect
   return <>{children}</>;
 }

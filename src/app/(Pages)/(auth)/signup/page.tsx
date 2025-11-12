@@ -47,17 +47,10 @@ export default function SignUp() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Redirect authenticated users to dashboard immediately
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      router.push('/dashboard');
-    }
-  }, [status, session, router]);
-
   const [isLoading, setIsLoading] = useState(false);
 
-  // Show loading while checking authentication status
-  if (status === 'loading' || !isMounted) {
+  // Show loading while mounting (don't check auth status to prevent redirect loops)
+  if (!isMounted) {
     return (
       <div style={{
         display: 'flex',
@@ -82,45 +75,7 @@ export default function SignUp() {
           color: '#1A202C',
           fontWeight: 500,
         }}>
-          Checking authentication...
-        </p>
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  // If user is authenticated, show redirecting message
-  if (status === 'authenticated') {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        flexDirection: 'column',
-        gap: '20px',
-        fontFamily: 'Montserrat, sans-serif',
-        background: '#FFFFFF',
-      }}>
-        <div style={{
-          width: '50px',
-          height: '50px',
-          border: '3px solid #E2E8F0',
-          borderTop: '3px solid #03A9F5',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-        }} />
-        <p style={{
-          fontSize: '18px',
-          color: '#1A202C',
-          fontWeight: 500,
-        }}>
-          Redirecting to dashboard...
+          Loading...
         </p>
         <style jsx>{`
           @keyframes spin {

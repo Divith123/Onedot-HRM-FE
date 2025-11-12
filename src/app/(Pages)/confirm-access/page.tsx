@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { ProtectedLayout } from '@/components/auth/ProtectedLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -139,18 +140,31 @@ export default function ConfirmAccessPage() {
       });
 
       if (response.success && response.token) {
-        // Password is correct
+        // Password is correct - create NextAuth session
+        const sessionResult = await signIn("credentials", {
+          email: user.email,
+          token: response.token,
+          refreshToken: response.refreshToken,
+          tokenExpiry: response.tokenExpiry,
+          user: JSON.stringify(response.user),
+          redirect: false,
+        });
+
         setIsVerifying(false);
         setShowPasswordDialog(false);
         setPassword('');
         
-        // Show success announcement
-        setShowSuccessDialog(true);
-        
-        // Complete setup after showing success
-        setTimeout(() => {
-          completeSetup();
-        }, 2000);
+        if (sessionResult?.ok) {
+          // Show success announcement
+          setShowSuccessDialog(true);
+          
+          // Complete setup after showing success
+          setTimeout(() => {
+            completeSetup();
+          }, 2000);
+        } else {
+          showToast({ variant: 'error', message: 'Failed to create session. Please try again.' });
+        }
       } else {
         setIsVerifying(false);
         showToast({ variant: 'error', message: 'Invalid password. Please try again.' });

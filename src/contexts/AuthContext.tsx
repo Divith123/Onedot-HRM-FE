@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useSession } from 'next-auth/react';
 import { UserDto } from '@/types/api.types';
 import authService from '@/services/auth.service';
 
@@ -20,24 +21,50 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const { data: session, status } = useSession();
   const [user, setUser] = useState<UserDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const initAuth = () => {
+    // Sync with NextAuth session
+    if (status === 'loading') {
+      setIsLoading(true);
+      return;
+    }
+
+    if (status === 'authenticated' && session?.user) {
+      // Check if we have full user data in localStorage
+      const storedUser = authService.getStoredUser();
+      if (storedUser) {
+        // Use stored user data which has all UserDto fields
+        setUser(storedUser);
+      } else {
+        // Convert NextAuth user to UserDto format with minimal data
+        const userData: UserDto = {
+          id: parseInt(session.user.id || '0'),
+          email: session.user.email || '',
+          fullName: session.user.name || '',
+          createdAt: new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+          profilePictureUrl: undefined,
+          oAuthProvider: undefined,
+        };
+        setUser(userData);
+      }
+      setIsLoading(false);
+    } else {
+      // Check localStorage as fallback
       const storedUser = authService.getStoredUser();
       const isAuth = authService.isAuthenticated();
 
       if (isAuth && storedUser) {
         setUser(storedUser);
+      } else {
+        setUser(null);
       }
-
       setIsLoading(false);
-    };
-
-    initAuth();
-  }, []);
+    }
+  }, [session, status]);
 
   const login = (userData: UserDto) => {
     setUser(userData);
@@ -62,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user && authService.isAuthenticated(),
+    isAuthenticated: status === 'authenticated' || (!!user && authService.isAuthenticated()),
     isLoading,
     login,
     logout,

@@ -16,15 +16,12 @@ import {
 } from '../../../../components/pages/auth/ui';
 import { LinkedInButton } from '../../../../components/pages/auth/ui/LinkedInButton';
 import PageTransition from '../../../../components/animations/PageTransition';
-import authService from '@/services/auth.service';
-import { useAuth } from '@/contexts/AuthContext';
 import { GoogleOAuthProviderWrapper } from '@/components/providers/GoogleOAuthProvider';
 import { useToast } from '@/components/providers/ToastProvider';
 
 export default function SignIn() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const { login } = useAuth();
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,6 +29,7 @@ export default function SignIn() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isResponsive, setIsResponsive] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -44,17 +42,11 @@ export default function SignIn() {
     return () => window.removeEventListener('resize', checkResponsive);
   }, []);
 
-  // Redirect authenticated users to dashboard immediately
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      router.push('/dashboard');
-    }
-  }, [status, session, router]);
+  // Don't check authentication status here - let middleware handle redirects
+  // This prevents the redirect loop
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Show loading while checking authentication status
-  if (status === 'loading' || !isMounted) {
+  // Show loading while mounting
+  if (!isMounted) {
     return (
       <div style={{
         display: 'flex',
@@ -79,45 +71,7 @@ export default function SignIn() {
           color: '#1A202C',
           fontWeight: 500,
         }}>
-          Checking authentication...
-        </p>
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  // If user is authenticated, show redirecting message
-  if (status === 'authenticated') {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        flexDirection: 'column',
-        gap: '20px',
-        fontFamily: 'Montserrat, sans-serif',
-        background: '#FFFFFF',
-      }}>
-        <div style={{
-          width: '50px',
-          height: '50px',
-          border: '3px solid #E2E8F0',
-          borderTop: '3px solid #03A9F5',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-        }} />
-        <p style={{
-          fontSize: '18px',
-          color: '#1A202C',
-          fontWeight: 500,
-        }}>
-          Redirecting to dashboard...
+          Loading...
         </p>
         <style jsx>{`
           @keyframes spin {
@@ -146,43 +100,24 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      // First call backend API to get user data and tokens
-      const response = await authService.signin({
+      // Use NextAuth signIn with credentials
+      const result = await signIn("credentials", {
         email: email.trim(),
         password: password,
+        redirect: false, // Handle redirect manually
       });
 
-      if (response.success && response.token) {
-        // Auth data is already saved by authService.signin
-        showToast({ variant: 'success', message: 'Login successful!' });
-
-        // Create NextAuth session for client-side guards
-        const result = await signIn("credentials", {
-          email: email.trim(),
-          token: response.token,
-          refreshToken: response.refreshToken,
-          user: JSON.stringify(response.user),
-          redirect: false,
-        });
-
-        if (!result?.error) {
-          // Wait a moment for NextAuth to update session, then redirect
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 300);
-        } else {
-          // If NextAuth session creation failed, still navigate since local tokens are stored
-          router.push('/dashboard');
-        }
-      } else {
-        const errorMsg = response.message || 'Invalid email or password';
-        showToast({ variant: 'error', message: errorMsg });
+      if (result?.error) {
+        showToast({ variant: 'error', message: 'Invalid email or password' });
         setIsLoading(false);
+      } else if (result?.ok) {
+        showToast({ variant: 'success', message: 'Login successful!' });
+        // NextAuth will handle the redirect via middleware
+        router.push('/dashboard');
       }
     } catch (error: any) {
       console.error('Signin error:', error);
-      const errorMsg = error?.response?.data?.message || 'An error occurred during sign in. Please try again.';
-      showToast({ variant: 'error', message: errorMsg });
+      showToast({ variant: 'error', message: 'An error occurred during sign in. Please try again.' });
       setIsLoading(false);
     }
   };
@@ -346,7 +281,43 @@ export default function SignIn() {
                 Sign in with
               </span>
             </div>
+            {/* Sign in with text */}
+            <div
+              style={{
+                width: '100%',
+                textAlign: 'center',
+                marginTop: '16px',
+                marginBottom: '16px',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'Montserrat',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  fontSize: 'clamp(14px, 2vw, 16px)',
+                  lineHeight: '150%',
+                  color: '#718096',
+                }}
+              >
+                Sign in with
+              </span>
+            </div>
 
+            {/* OAuth Buttons Row */}
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '16px',
+              }}
+            >
+              <GoogleButton variant="circle" />
+              <GitHubButton variant="circle" />
+              <LinkedInButton variant="circle" />
+            </div>
             {/* OAuth Buttons Row */}
             <div
               style={{
@@ -522,7 +493,47 @@ export default function SignIn() {
             Sign in with
           </span>
         </div>
+        {/* Sign in with text */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '17.7%',
+            top: '70%',
+            width: '27.5%',
+            textAlign: 'center',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              fontSize: 'clamp(14px, 1.5vh, 16px)',
+              lineHeight: '150%',
+              color: '#718096',
+            }}
+          >
+            Sign in with
+          </span>
+        </div>
 
+        {/* OAuth Buttons Row */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '17.7%',
+            top: '78%',
+            width: '27.5%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '16px',
+          }}
+        >
+          <GoogleButton variant="circle" />
+          <GitHubButton variant="circle" />
+          <LinkedInButton variant="circle" />
+        </div>
         {/* OAuth Buttons Row */}
         <div
           style={{

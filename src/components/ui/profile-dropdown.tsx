@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -10,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Building2, User } from 'lucide-react'
+import { Building2, User, LogOut } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 import authService from '@/services/auth.service'
 
 interface ProfileDropdownProps {
@@ -19,40 +21,55 @@ interface ProfileDropdownProps {
 
 export function ProfileDropdown({ className }: ProfileDropdownProps) {
   const router = useRouter()
-  const user = authService.getStoredUser()
+  const { data: session } = useSession()
+  const { user: authUser } = useAuth()
+
+  // Use NextAuth session first, fallback to AuthContext
+  const sessionUser = session?.user
+  const user = sessionUser || authUser
 
   if (!user) {
     return null
   }
 
+  // Get display values with fallbacks
+  const displayName = sessionUser?.name || authUser?.fullName || 'User'
+  const displayEmail = sessionUser?.email || authUser?.email || ''
+  const profilePictureUrl = authUser?.profilePictureUrl
+
   // Get user initials for avatar fallback
-  const getInitials = (fullName: string) => {
-    return fullName
+  const getInitials = (name: string) => {
+    return name
       .split(' ')
-      .map(name => name.charAt(0))
+      .map(word => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2)
   }
 
   const handleOrganizationClick = () => {
-    router.push('/organization') // Navigate to organization setup page
+    router.push('/organization')
   }
 
   const handleProfileClick = () => {
-    router.push('/profile') // Navigate to profile page
+    router.push('/profile')
+  }
+
+  const handleLogout = async () => {
+    // Clear both NextAuth and local storage
+    await authService.logout()
+    await signOut({ callbackUrl: '/signin' })
   }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className={`h-14 w-14 cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200 ring-2 ring-transparent hover:ring-slate-200 ${className}`}>
-          <AvatarImage
-            src={user.profilePictureUrl}
-            alt={user.fullName}
-          />
+          {profilePictureUrl && (
+            <AvatarImage src={profilePictureUrl} alt={displayName} />
+          )}
           <AvatarFallback className="bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 font-semibold text-base">
-            {getInitials(user.fullName)}
+            {getInitials(displayName)}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -62,8 +79,8 @@ export function ProfileDropdown({ className }: ProfileDropdownProps) {
         sideOffset={8}
       >
         <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
-          <p className="text-sm font-semibold text-slate-900">{user.fullName}</p>
-          <p className="text-xs text-slate-500 mt-0.5">{user.email}</p>
+          <p className="text-sm font-semibold text-slate-900">{displayName}</p>
+          <p className="text-xs text-slate-500 mt-0.5">{displayEmail}</p>
         </div>
         <DropdownMenuSeparator className="bg-slate-100" />
         <div className="py-2">
@@ -80,6 +97,14 @@ export function ProfileDropdown({ className }: ProfileDropdownProps) {
           >
             <User className="mr-3 h-4 w-4 text-slate-600" />
             <span className="text-slate-700 font-medium">Profile</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-slate-100 mx-2" />
+          <DropdownMenuItem 
+            onClick={handleLogout}
+            className="mx-2 rounded-lg px-3 py-2.5 hover:bg-red-50 focus:bg-red-50 transition-colors duration-150"
+          >
+            <LogOut className="mr-3 h-4 w-4 text-red-600" />
+            <span className="text-red-700 font-medium">Logout</span>
           </DropdownMenuItem>
         </div>
       </DropdownMenuContent>

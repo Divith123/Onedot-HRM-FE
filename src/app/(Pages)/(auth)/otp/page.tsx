@@ -4,6 +4,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { Rectangle } from '../../../../components/pages/auth/ui';
 import PageTransition from '../../../../components/animations/PageTransition';
 import authService from '@/services/auth.service';
@@ -101,19 +102,36 @@ function OTPContent() {
           verificationCode: otpValue,
         });
 
-        if (response.success && response.user) {
+        if (response.success && response.user && response.token) {
           showToast({ variant: 'success', message: response.message || 'Email verified successfully!' });
 
-          // Login user
+          // Login user in AuthContext
           login(response.user);
+
+          // Create NextAuth session
+          const result = await signIn("credentials", {
+            email: email,
+            token: response.token,
+            refreshToken: response.refreshToken,
+            tokenExpiry: response.tokenExpiry,
+            user: JSON.stringify(response.user),
+            redirect: false,
+          });
 
           // Clear session storage
           sessionStorage.removeItem('verificationEmail');
 
-          // Redirect to dashboard
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 1000);
+          if (result?.ok) {
+            // Redirect to dashboard
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 500);
+          } else {
+            showToast({ variant: 'error', message: 'Failed to create session. Please sign in again.' });
+            setTimeout(() => {
+              router.push('/signin');
+            }, 1500);
+          }
         } else {
           showToast({ variant: 'error', message: response.message || 'Invalid verification code' });
         }

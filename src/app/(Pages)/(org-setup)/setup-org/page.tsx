@@ -72,7 +72,7 @@ export default function SetupPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
       </div>
     </PageTransition>
     </ProtectedLayout>
