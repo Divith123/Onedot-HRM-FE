@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ProtectedLayout } from '@/components/auth/ProtectedLayout';
@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { RotateCcw, Check, RefreshCw } from 'lucide-react';
+import { Check } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,73 +24,19 @@ import {
 
 export default function OrganizationPage() {
   const router = useRouter();
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [organizationName, setOrganizationName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [organizationType, setOrganizationType] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [aiAgentAddon, setAiAgentAddon] = useState(false);
-  const [captchaText, setCaptchaText] = useState('');
-  const [userCaptchaInput, setUserCaptchaInput] = useState('');
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
-  const [captchaRotation, setCaptchaRotation] = useState(0);
-  const [showAnimatedTick, setShowAnimatedTick] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
 
-  // Generate random captcha text
-  const generateCaptcha = () => {
-    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-    let result = '';
-    for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
-
-  // Initialize captcha on component mount
-  React.useEffect(() => {
-    setCaptchaText(generateCaptcha());
-    setCaptchaRotation(Math.random() * 10 - 5); // Fixed rotation for consistency
-  }, []);
-
-  // Regenerate captcha
-  const regenerateCaptcha = () => {
-    setCaptchaText(generateCaptcha());
-    setCaptchaRotation(Math.random() * 10 - 5);
-    setUserCaptchaInput('');
-    setIsCaptchaVerified(false);
-    setShowAnimatedTick(false);
-  };
-
-  // Verify captcha input
-  const verifyCaptcha = (inputValue: string) => {
-    const isCorrect = inputValue.toLowerCase() === captchaText.toLowerCase();
-    setIsCaptchaVerified(isCorrect);
-    
-    if (isCorrect) {
-      setShowAnimatedTick(true);
-      // Hide the tick after animation
-      setTimeout(() => setShowAnimatedTick(false), 2000);
-    } else {
-      setShowAnimatedTick(false);
-      // Regenerate captcha on failed attempt
-      setTimeout(() => {
-        regenerateCaptcha();
-      }, 1000);
-    }
-    
-    return isCorrect;
-  };
-
-  // Handle captcha input change
-  const handleCaptchaInputChange = (value: string) => {
-    setUserCaptchaInput(value);
-    
-    // Auto-verify when input length matches captcha length
-    if (value.length === captchaText.length) {
-      // Use setTimeout to ensure state has updated
-      setTimeout(() => {
-        verifyCaptcha(value);
-      }, 100);
+  // Handle reCAPTCHA verification
+  const handleRecaptchaChange = (token: string | null) => {
+    if (token) {
+      setIsCaptchaVerified(true);
     } else {
       setIsCaptchaVerified(false);
     }
@@ -219,7 +166,7 @@ export default function OrganizationPage() {
                 </RadioGroup>
               </div>
 
-              {/* Verify Account */}
+              {/* Verify Account with reCAPTCHA */}
               <div className="mb-6">
                 <Label className="text-sm font-medium text-gray-700 mb-4 block">
                   Verify your account <span className="text-red-500">*</span>
@@ -234,102 +181,18 @@ export default function OrganizationPage() {
                   <p className="text-sm text-gray-600 mb-4 text-center">
                     {isCaptchaVerified 
                       ? "Verification complete! You can now proceed with your organization setup."
-                      : "Please type the characters you see below to verify you're human"
+                      : "Please verify you're human by completing the reCAPTCHA below"
                     }
                   </p>
 
-                  {/* Captcha Display */}
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="relative w-full max-w-xs">
-                      {isCaptchaVerified ? (
-                        /* Success State - Like Google reCAPTCHA */
-                        <div className="bg-green-50 border-2 border-green-300 rounded-lg px-4 py-3 text-center cursor-not-allowed">
-                          <div className="flex items-center justify-center space-x-2">
-                            <Check className="w-5 h-5 text-green-600" />
-                            <span className="text-green-700 font-medium text-sm">Verified</span>
-                          </div>
-                        </div>
-                      ) : (
-                        /* Captcha Input State */
-                        <>
-                          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg px-6 py-3 text-center">
-                            <span
-                              className="text-2xl font-bold tracking-wider text-blue-800 select-none"
-                              style={{
-                                textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
-                                transform: `rotate(${captchaRotation}deg)`,
-                                fontFamily: 'monospace'
-                              }}
-                            >
-                              {captchaText}
-                            </span>
-                          </div>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={regenerateCaptcha}
-                            className="absolute -right-2 -top-2 bg-white border border-gray-300 rounded-full p-1 hover:bg-gray-50"
-                          >
-                            <RefreshCw className="w-4 h-4 text-gray-600" />
-                          </Button>
-                        </>
-                      )}
-
-                      {/* Animated Tick Overlay for initial verification */}
-                      {showAnimatedTick && !isCaptchaVerified && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-green-500/95 rounded-lg animate-in fade-in-0 zoom-in-95 duration-300">
-                          <div className="bg-white rounded-full p-2 animate-bounce">
-                            <Check className="w-6 h-6 text-green-600" />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Captcha Input - Only show when not verified */}
-                    {!isCaptchaVerified && (
-                      <div className="w-full max-w-xs">
-                        <Input
-                          type="text"
-                          placeholder="Type the characters above"
-                          value={userCaptchaInput}
-                          onChange={(e) => handleCaptchaInputChange(e.target.value)}
-                          className={`text-center font-mono text-lg ${
-                            userCaptchaInput && userCaptchaInput.length === captchaText.length
-                              ? isCaptchaVerified
-                                ? 'border-green-500 bg-green-50'
-                                : 'border-red-500 bg-red-50'
-                              : ''
-                          }`}
-                          maxLength={captchaText.length}
-                        />
-                        {userCaptchaInput && userCaptchaInput.length === captchaText.length && (
-                          <p className={`text-xs mt-1 text-center font-medium ${
-                            isCaptchaVerified ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {isCaptchaVerified ? (
-                              <span className="flex items-center justify-center space-x-1">
-                                <Check className="w-3 h-3" />
-                                <span>Verification successful!</span>
-                              </span>
-                            ) : (
-                              '✗ Incorrect characters, try again'
-                            )}
-                          </p>
-                        )}
-
-                        {/* Manual Verify Button */}
-                        <Button
-                          onClick={() => verifyCaptcha(userCaptchaInput)}
-                          disabled={!userCaptchaInput || userCaptchaInput.length !== captchaText.length}
-                          variant="outline"
-                          size="sm"
-                          className="mt-2 w-full"
-                        >
-                          Verify
-                        </Button>
-                      </div>
-                    )}
+                  {/* Google reCAPTCHA */}
+                  <div className="flex justify-center">
+                    <ReCAPTCHA
+                      ref={recaptchaRef}
+                      sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LckigosAAAAABf-pV0XnaMDWFTCkQajpm7U4Z0X"}
+                      onChange={handleRecaptchaChange}
+                      theme="light"
+                    />
                   </div>
                 </div>
               </div>
