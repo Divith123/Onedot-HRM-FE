@@ -4,14 +4,22 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ProtectedLayout } from '@/components/auth/ProtectedLayout';
-import Sidebar from '@/components/pages/common/Sidebar';
-import { Navbar } from '@/components/ui/navbar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RotateCcw, Check, RefreshCw } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function OrganizationPage() {
   const router = useRouter();
@@ -25,6 +33,7 @@ export default function OrganizationPage() {
   const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
   const [captchaRotation, setCaptchaRotation] = useState(0);
   const [showAnimatedTick, setShowAnimatedTick] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
 
   // Generate random captcha text
   const generateCaptcha = () => {
@@ -103,16 +112,35 @@ export default function OrganizationPage() {
     router.push('/add-members');
   };
 
+  const handleLogoClick = () => {
+    setShowExitDialog(true);
+  };
+
+  const handleExitConfirm = () => {
+    setShowExitDialog(false);
+    router.push('/dashboard');
+  };
+
   return (
     <ProtectedLayout>
       <div className="flex h-screen bg-gray-50">
-        {/* Sidebar */}
-        <Sidebar />
-
-        {/* Main Content */}
+        {/* Main Content - Full Width without Sidebar */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Navbar */}
-          <Navbar />
+          {/* Logo Header - Replaces Navbar */}
+          <div className="shrink-0 px-8 py-6 bg-gray-50">
+            <div 
+              className="cursor-pointer inline-block hover:opacity-80 transition-opacity"
+              onClick={handleLogoClick}
+            >
+              <Image
+                src="/onedot.svg"
+                alt="Onedot Logo"
+                width={140}
+                height={32}
+                priority
+              />
+            </div>
+          </div>
 
           {/* Organization Setup Content */}
           <div className="flex-1 overflow-y-auto p-8">
@@ -169,17 +197,17 @@ export default function OrganizationPage() {
                   This organization belongs to: <span className="text-red-500">*</span>
                 </Label>
                 <RadioGroup value={organizationType} onValueChange={setOrganizationType}>
-                  <div className="flex items-center space-x-2 mb-3">
+                  <div className="flex items-center space-x-2 -mb-1">
                     <RadioGroupItem value="personal" id="personal" />
                     <Label htmlFor="personal" className="text-sm text-gray-700">
                       My personal account
                     </Label>
                   </div>
-                  <p className="text-xs text-gray-500 ml-6 mb-3">
+                  <p className="text-xs text-gray-500 ml-6 mb-1">
                     I.e., Johndee (John Dee)
                   </p>
 
-                  <div className="flex items-center space-x-2 mb-3">
+                  <div className="flex items-center space-x-2 -mb-1">
                     <RadioGroupItem value="business" id="business" />
                     <Label htmlFor="business" className="text-sm text-gray-700">
                       A Business or Institution
@@ -360,7 +388,7 @@ export default function OrganizationPage() {
                 <Button
                   onClick={handleNext}
                   disabled={!organizationName || !contactEmail || !organizationType || !isCaptchaVerified || !acceptTerms}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold text-lg"
+                  className="bg-[#03A9F5] hover:bg-[#0288D1] text-white px-8 py-2 rounded-lg font-semibold text-lg"
                 >
                   NEXT
                 </Button>
@@ -369,6 +397,24 @@ export default function OrganizationPage() {
           </div>
         </div>
       </div>
+
+      {/* Exit Warning Dialog */}
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave organization setup?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress will be saved, but you'll need to complete the setup process later to access all features. Are you sure you want to leave?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay on this page</AlertDialogCancel>
+            <AlertDialogAction onClick={handleExitConfirm} className="bg-[#03A9F5] hover:bg-[#0288D1]">
+              Leave setup
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ProtectedLayout>
   );
 }

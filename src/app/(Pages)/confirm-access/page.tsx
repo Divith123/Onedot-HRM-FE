@@ -4,10 +4,29 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ProtectedLayout } from '@/components/auth/ProtectedLayout';
-import Sidebar from '@/components/pages/common/Sidebar';
-import { Navbar } from '@/components/ui/navbar';
 import { Button } from '@/components/ui/button';
-import { Mail, Smartphone, AlertCircle, Shield } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Mail, Smartphone, AlertCircle, Shield, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from '@/components/providers/ToastProvider';
+import authService from '@/services/auth.service';
 
 interface User {
   id: number;
@@ -28,10 +47,17 @@ interface OrganizationData {
 
 export default function ConfirmAccessPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [organizationData, setOrganizationData] = useState<OrganizationData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<'gmail' | 'password' | null>(null);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Load user and organization data from localStorage
   useEffect(() => {
@@ -86,18 +112,54 @@ export default function ConfirmAccessPage() {
     completeSetup();
   };
 
-  const handlePasswordAuth = async () => {
-    setIsLoading(true);
+  const handlePasswordAuth = () => {
+    // Open password dialog instead of directly authenticating
     setAuthMethod('password');
+    setShowPasswordDialog(true);
+  };
 
-    // Simulate password verification
-    await new Promise(resolve => setTimeout(resolve, 1500));
+  const handlePasswordVerification = async () => {
+    if (!password) {
+      showToast({ variant: 'error', message: 'Please enter your password' });
+      return;
+    }
 
-    // In a real app, this would verify password with backend
-    console.log('Password authentication completed');
+    if (!user) {
+      showToast({ variant: 'error', message: 'User information not found' });
+      return;
+    }
 
-    // Complete the organization setup
-    completeSetup();
+    setIsVerifying(true);
+
+    try {
+      // Verify password with backend using authService
+      const response = await authService.signin({
+        email: user.email,
+        password: password,
+      });
+
+      if (response.success && response.token) {
+        // Password is correct
+        setIsVerifying(false);
+        setShowPasswordDialog(false);
+        setPassword('');
+        
+        // Show success announcement
+        setShowSuccessDialog(true);
+        
+        // Complete setup after showing success
+        setTimeout(() => {
+          completeSetup();
+        }, 2000);
+      } else {
+        setIsVerifying(false);
+        showToast({ variant: 'error', message: 'Invalid password. Please try again.' });
+      }
+    } catch (error: any) {
+      setIsVerifying(false);
+      const errorMsg = error?.response?.data?.message || 'Invalid password. Please try again.';
+      showToast({ variant: 'error', message: errorMsg });
+    }
   };
 
   const completeSetup = () => {
@@ -123,11 +185,19 @@ export default function ConfirmAccessPage() {
     router.push('/dashboard');
   };
 
+  const handleLogoClick = () => {
+    setShowExitDialog(true);
+  };
+
+  const handleExitConfirm = () => {
+    setShowExitDialog(false);
+    router.push('/dashboard');
+  };
+
   if (!user || !organizationData) {
     return (
       <ProtectedLayout>
         <div className="flex h-screen bg-gray-50">
-          <Sidebar />
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -142,13 +212,23 @@ export default function ConfirmAccessPage() {
   return (
     <ProtectedLayout>
       <div className="flex h-screen bg-gray-50">
-        {/* Sidebar */}
-        <Sidebar />
-
-        {/* Main Content */}
+        {/* Main Content - Full Width without Sidebar */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Navbar */}
-          <Navbar />
+          {/* Logo Header - Replaces Navbar */}
+          <div className="shrink-0 px-8 py-6 bg-gray-50">
+            <div 
+              className="cursor-pointer inline-block hover:opacity-80 transition-opacity"
+              onClick={handleLogoClick}
+            >
+              <Image
+                src="/onedot.svg"
+                alt="Onedot Logo"
+                width={140}
+                height={32}
+                priority
+              />
+            </div>
+          </div>
 
           {/* Confirm Access Content */}
           <div className="flex-1 overflow-y-auto p-8">
@@ -247,6 +327,111 @@ export default function ConfirmAccessPage() {
           </div>
         </div>
       </div>
+
+      {/* Password Verification Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Verify your password</DialogTitle>
+            <DialogDescription>
+              Enter password for <strong>{user?.email}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !isVerifying) {
+                    handlePasswordVerification();
+                  }
+                }}
+                className="pr-10"
+                disabled={isVerifying}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                disabled={isVerifying}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPasswordDialog(false);
+                setPassword('');
+                setShowPassword(false);
+              }}
+              disabled={isVerifying}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handlePasswordVerification}
+              disabled={isVerifying || !password}
+              className="bg-[#03A9F5] hover:bg-[#0288D1]"
+            >
+              {isVerifying ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Verifying...
+                </>
+              ) : (
+                'Verify'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-10 h-10 text-green-600" />
+              </div>
+              <DialogTitle className="text-center text-2xl">
+                Organization Created!
+              </DialogTitle>
+              <DialogDescription className="text-center">
+                Your organization <strong>{organizationData?.organizationName}</strong> has been successfully created. Redirecting to dashboard...
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      {/* Exit Warning Dialog */}
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave organization setup?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress will be saved, but you'll need to complete the setup process later to access all features. Are you sure you want to leave?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay on this page</AlertDialogCancel>
+            <AlertDialogAction onClick={handleExitConfirm} className="bg-[#03A9F5] hover:bg-[#0288D1]">
+              Leave setup
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ProtectedLayout>
   );
 }

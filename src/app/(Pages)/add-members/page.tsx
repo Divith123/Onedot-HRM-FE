@@ -4,12 +4,20 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ProtectedLayout } from '@/components/auth/ProtectedLayout';
-import Sidebar from '@/components/pages/common/Sidebar';
-import { Navbar } from '@/components/ui/navbar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, X, Users, UserPlus } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface OrganizationData {
   organizationName: string;
@@ -35,6 +43,7 @@ export default function AddMembersPage() {
   const [searchResults, setSearchResults] = useState<Member[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
 
   // Load organization data from localStorage
   useEffect(() => {
@@ -150,11 +159,19 @@ export default function AddMembersPage() {
     router.push('/confirm-access');
   };
 
+  const handleLogoClick = () => {
+    setShowExitDialog(true);
+  };
+
+  const handleExitConfirm = () => {
+    setShowExitDialog(false);
+    router.push('/dashboard');
+  };
+
   if (!organizationData) {
     return (
       <ProtectedLayout>
         <div className="flex h-screen bg-gray-50">
-          <Sidebar />
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -169,13 +186,23 @@ export default function AddMembersPage() {
   return (
     <ProtectedLayout>
       <div className="flex h-screen bg-gray-50">
-        {/* Sidebar */}
-        <Sidebar />
-
-        {/* Main Content */}
+        {/* Main Content - Full Width without Sidebar */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Navbar */}
-          <Navbar />
+          {/* Logo Header - Replaces Navbar */}
+          <div className="shrink-0 px-8 py-6 bg-gray-50">
+            <div 
+              className="cursor-pointer inline-block hover:opacity-80 transition-opacity"
+              onClick={handleLogoClick}
+            >
+              <Image
+                src="/onedot.svg"
+                alt="Onedot Logo"
+                width={140}
+                height={32}
+                priority
+              />
+            </div>
+          </div>
 
           {/* Add Members Content */}
           <div className="flex-1 overflow-y-auto p-8">
@@ -305,7 +332,7 @@ export default function AddMembersPage() {
                 </Button>
                 <Button
                   onClick={handleCompleteSetup}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2"
+                  className="bg-[#03A9F5] hover:bg-[#0288D1] text-white px-6 py-2"
                 >
                   Complete setup
                 </Button>
@@ -314,6 +341,24 @@ export default function AddMembersPage() {
           </div>
         </div>
       </div>
+
+      {/* Exit Warning Dialog */}
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave organization setup?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress will be saved, but you'll need to complete the setup process later to access all features. Are you sure you want to leave?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay on this page</AlertDialogCancel>
+            <AlertDialogAction onClick={handleExitConfirm} className="bg-[#03A9F5] hover:bg-[#0288D1]">
+              Leave setup
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ProtectedLayout>
   );
 }

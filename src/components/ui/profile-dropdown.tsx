@@ -46,12 +46,12 @@ export function ProfileDropdown({ className }: ProfileDropdownProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className={`cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200 ring-2 ring-transparent hover:ring-slate-200 ${className}`}>
+        <Avatar className={`h-12 w-12 cursor-pointer hover:scale-105 hover:shadow-lg transition-all duration-200 ring-2 ring-transparent hover:ring-slate-200 ${className}`}>
           <AvatarImage
             src={user.profilePictureUrl}
             alt={user.fullName}
           />
-          <AvatarFallback className="bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 font-semibold">
+          <AvatarFallback className="bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 font-semibold text-base">
             {getInitials(user.fullName)}
           </AvatarFallback>
         </Avatar>

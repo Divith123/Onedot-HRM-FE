@@ -9,7 +9,7 @@ interface NavbarProps {
 
 export function Navbar({ className }: NavbarProps) {
   return (
-    <nav className={`bg-white border-b border-gray-200 px-6 py-3 flex justify-end ${className}`}>
+    <nav className={`bg-[#fafbfc] px-6 py-4 flex justify-end ${className}`}>
       <ProfileDropdown />
     </nav>
   )

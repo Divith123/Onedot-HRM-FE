@@ -146,28 +146,43 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
+      // First call backend API to get user data and tokens
+      const response = await authService.signin({
         email: email.trim(),
         password: password,
-        redirect: false, // Don't redirect automatically, handle it manually
       });
 
-      if (result?.error) {
-        console.error('Signin error:', result.error);
-        showToast({ variant: 'error', message: 'Invalid email or password. Please try again.' });
-        setIsLoading(false);
-      } else {
-        // If there's no error, login was successful
+      if (response.success && response.token) {
+        // Auth data is already saved by authService.signin
         showToast({ variant: 'success', message: 'Login successful!' });
-        
-        // Wait a moment for NextAuth to update session, then redirect
-        setTimeout(() => {
+
+        // Create NextAuth session for client-side guards
+        const result = await signIn("credentials", {
+          email: email.trim(),
+          token: response.token,
+          refreshToken: response.refreshToken,
+          user: JSON.stringify(response.user),
+          redirect: false,
+        });
+
+        if (!result?.error) {
+          // Wait a moment for NextAuth to update session, then redirect
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 300);
+        } else {
+          // If NextAuth session creation failed, still navigate since local tokens are stored
           router.push('/dashboard');
-        }, 300);
+        }
+      } else {
+        const errorMsg = response.message || 'Invalid email or password';
+        showToast({ variant: 'error', message: errorMsg });
+        setIsLoading(false);
       }
     } catch (error: any) {
-      console.error('Signin catch error:', error);
-      showToast({ variant: 'error', message: 'An error occurred during sign in. Please try again.' });
+      console.error('Signin error:', error);
+      const errorMsg = error?.response?.data?.message || 'An error occurred during sign in. Please try again.';
+      showToast({ variant: 'error', message: errorMsg });
       setIsLoading(false);
     }
   };
