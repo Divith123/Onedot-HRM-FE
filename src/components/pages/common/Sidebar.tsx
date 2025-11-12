@@ -169,10 +169,10 @@ const Sidebar: React.FC = () => {
       {/* Fixed Logo Section */}
       <div className="shrink-0 px-8 py-7 border-b border-gray-100">
         <Image
-          src="/onedot-large.svg"
+          src="/onedot.svg"
           alt="Onedot Logo"
-          width={100}
-          height={20}
+          width={140}
+          height={32}
           priority
         />
       </div>

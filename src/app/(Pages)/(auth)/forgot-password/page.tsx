@@ -126,11 +126,11 @@ export default function ForgotPassword() {
 
           {/* Logo */}
           <img
-            src="/onedot-large.svg"
+            src="/onedot.svg"
             alt="OneDot"
             style={{
               height: 'auto',
-              width: '100px',
+              width: '140px',
               marginBottom: '20px',
               alignSelf: 'flex-start',
             }}
@@ -463,13 +463,13 @@ export default function ForgotPassword() {
 
         {/* Logo */}
         <img
-          src="/onedot-large.svg"
+          src="/onedot.svg"
           alt="OneDot"
           style={{
             position: 'absolute',
-            left: '18.5%',
-            top: '29%',
-            height: '4.4vh',
+            left: '18.0%',
+            top: '27%',
+            height: '5vh',
             width: 'auto',
           }}
         />

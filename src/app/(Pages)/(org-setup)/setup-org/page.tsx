@@ -12,12 +12,12 @@ export default function SetupPage() {
     <ProtectedLayout>
       <PageTransition>
         <div className="relative w-full h-screen bg-white overflow-hidden flex flex-col items-center justify-center" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-      <div className="absolute w-[100px] h-5 left-7 top-7">
+      <div className="absolute w-[140px] h-8 left-7 top-7">
         <Image
-          src="/onedot-large.svg"
+          src="/onedot.svg"
           alt="Onedot Logo"
-          width={100}
-          height={20}
+          width={140}
+          height={32}
           priority
         />
       </div>
@@ -72,7 +72,7 @@ export default function SetupPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
       </div>
     </PageTransition>
     </ProtectedLayout>

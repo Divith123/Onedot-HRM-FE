@@ -45,30 +45,26 @@ export default auth((req) => {
     return
   }
 
-  // If authenticated, redirect away from auth pages
-  if (isAuthenticated) {
-    if (pathname === '/signin' || pathname === '/signup') {
-      return Response.redirect(new URL('/dashboard', req.nextUrl))
-    }
-    return
+  // Check if current page is public or protected
+  const isPublicPage = PUBLIC_PAGES.includes(pathname) || 
+                       PUBLIC_PAGES.some(page => pathname.startsWith(page))
+  const isProtectedPage = PROTECTED_PAGES.some(page => pathname.startsWith(page))
+
+  // If authenticated user tries to access auth pages, redirect to dashboard
+  if (isAuthenticated && isPublicPage && pathname !== '/') {
+    return Response.redirect(new URL('/dashboard', req.nextUrl))
   }
 
-  // If NOT authenticated
-  if (!isAuthenticated) {
-    const isProtectedPage = PROTECTED_PAGES.some(page => pathname.startsWith(page))
-    const isPublicPage = PUBLIC_PAGES.includes(pathname)
-
-    // Redirect to signin if accessing protected page
-    if (isProtectedPage || (!isPublicPage && pathname !== '/')) {
-      let from = pathname;
-      if (req.nextUrl.search) {
-        from += req.nextUrl.search;
-      }
-      return Response.redirect(
-        new URL(`/signin?from=${encodeURIComponent(from)}`, req.nextUrl)
-      );
-    }
+  // If unauthenticated user tries to access protected pages, redirect to signin
+  if (!isAuthenticated && isProtectedPage) {
+    const from = pathname + (req.nextUrl.search || '');
+    return Response.redirect(
+      new URL(`/signin?from=${encodeURIComponent(from)}`, req.nextUrl)
+    )
   }
+
+  // Allow all other requests
+  return
 })
 
 export const config = {

@@ -16,15 +16,12 @@ import {
 } from '../../../../components/pages/auth/ui';
 import { LinkedInButton } from '../../../../components/pages/auth/ui/LinkedInButton';
 import PageTransition from '../../../../components/animations/PageTransition';
-import authService from '@/services/auth.service';
-import { useAuth } from '@/contexts/AuthContext';
 import { GoogleOAuthProviderWrapper } from '@/components/providers/GoogleOAuthProvider';
 import { useToast } from '@/components/providers/ToastProvider';
 
 export default function SignIn() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const { login } = useAuth();
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,6 +29,7 @@ export default function SignIn() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isResponsive, setIsResponsive] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -44,17 +42,11 @@ export default function SignIn() {
     return () => window.removeEventListener('resize', checkResponsive);
   }, []);
 
-  // Redirect authenticated users to dashboard immediately
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      router.push('/dashboard');
-    }
-  }, [status, session, router]);
+  // Don't check authentication status here - let middleware handle redirects
+  // This prevents the redirect loop
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Show loading while checking authentication status
-  if (status === 'loading' || !isMounted) {
+  // Show loading while mounting
+  if (!isMounted) {
     return (
       <div style={{
         display: 'flex',
@@ -79,45 +71,7 @@ export default function SignIn() {
           color: '#1A202C',
           fontWeight: 500,
         }}>
-          Checking authentication...
-        </p>
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  // If user is authenticated, show redirecting message
-  if (status === 'authenticated') {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        flexDirection: 'column',
-        gap: '20px',
-        fontFamily: 'Montserrat, sans-serif',
-        background: '#FFFFFF',
-      }}>
-        <div style={{
-          width: '50px',
-          height: '50px',
-          border: '3px solid #E2E8F0',
-          borderTop: '3px solid #03A9F5',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-        }} />
-        <p style={{
-          fontSize: '18px',
-          color: '#1A202C',
-          fontWeight: 500,
-        }}>
-          Redirecting to dashboard...
+          Loading...
         </p>
         <style jsx>{`
           @keyframes spin {
@@ -146,27 +100,23 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
+      // Use NextAuth signIn with credentials
       const result = await signIn("credentials", {
         email: email.trim(),
         password: password,
-        redirect: false, // Don't redirect automatically, handle it manually
+        redirect: false, // Handle redirect manually
       });
 
       if (result?.error) {
-        console.error('Signin error:', result.error);
-        showToast({ variant: 'error', message: 'Invalid email or password. Please try again.' });
+        showToast({ variant: 'error', message: 'Invalid email or password' });
         setIsLoading(false);
-      } else {
-        // If there's no error, login was successful
+      } else if (result?.ok) {
         showToast({ variant: 'success', message: 'Login successful!' });
-        
-        // Wait a moment for NextAuth to update session, then redirect
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 300);
+        // NextAuth will handle the redirect via middleware
+        router.push('/dashboard');
       }
     } catch (error: any) {
-      console.error('Signin catch error:', error);
+      console.error('Signin error:', error);
       showToast({ variant: 'error', message: 'An error occurred during sign in. Please try again.' });
       setIsLoading(false);
     }
@@ -198,11 +148,11 @@ export default function SignIn() {
           >
           {/* Logo */}
           <img
-            src="/onedot-large.svg"
+            src="/onedot.svg"
             alt="OneDot"
             style={{
               height: 'auto',
-              width: '100px',
+              width: '140px',
               marginBottom: '20px',
               alignSelf: 'flex-start',
             }}
@@ -331,7 +281,43 @@ export default function SignIn() {
                 Sign in with
               </span>
             </div>
+            {/* Sign in with text */}
+            <div
+              style={{
+                width: '100%',
+                textAlign: 'center',
+                marginTop: '16px',
+                marginBottom: '16px',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'Montserrat',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  fontSize: 'clamp(14px, 2vw, 16px)',
+                  lineHeight: '150%',
+                  color: '#718096',
+                }}
+              >
+                Sign in with
+              </span>
+            </div>
 
+            {/* OAuth Buttons Row */}
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '16px',
+              }}
+            >
+              <GoogleButton variant="circle" />
+              <GitHubButton variant="circle" />
+              <LinkedInButton variant="circle" />
+            </div>
             {/* OAuth Buttons Row */}
             <div
               style={{
@@ -372,13 +358,13 @@ export default function SignIn() {
 
         {/* Logo */}
         <img
-          src="/onedot-large.svg"
+          src="/onedot.svg"
           alt="OneDot"
           style={{
             position: 'absolute',
-            left: '17.5%',
-            top: '13.9%',
-            height: '4.4vh',
+            left: '17.0%',
+            top: '13.5%',
+            height: '5vh',
             width: 'auto',
           }}
         />
@@ -507,7 +493,47 @@ export default function SignIn() {
             Sign in with
           </span>
         </div>
+        {/* Sign in with text */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '17.7%',
+            top: '70%',
+            width: '27.5%',
+            textAlign: 'center',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: 400,
+              fontSize: 'clamp(14px, 1.5vh, 16px)',
+              lineHeight: '150%',
+              color: '#718096',
+            }}
+          >
+            Sign in with
+          </span>
+        </div>
 
+        {/* OAuth Buttons Row */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '17.7%',
+            top: '78%',
+            width: '27.5%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '16px',
+          }}
+        >
+          <GoogleButton variant="circle" />
+          <GitHubButton variant="circle" />
+          <LinkedInButton variant="circle" />
+        </div>
         {/* OAuth Buttons Row */}
         <div
           style={{

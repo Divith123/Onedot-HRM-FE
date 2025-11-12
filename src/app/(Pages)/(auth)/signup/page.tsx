@@ -47,17 +47,10 @@ export default function SignUp() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Redirect authenticated users to dashboard immediately
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      router.push('/dashboard');
-    }
-  }, [status, session, router]);
-
   const [isLoading, setIsLoading] = useState(false);
 
-  // Show loading while checking authentication status
-  if (status === 'loading' || !isMounted) {
+  // Show loading while mounting (don't check auth status to prevent redirect loops)
+  if (!isMounted) {
     return (
       <div style={{
         display: 'flex',
@@ -82,45 +75,7 @@ export default function SignUp() {
           color: '#1A202C',
           fontWeight: 500,
         }}>
-          Checking authentication...
-        </p>
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  // If user is authenticated, show redirecting message
-  if (status === 'authenticated') {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        flexDirection: 'column',
-        gap: '20px',
-        fontFamily: 'Montserrat, sans-serif',
-        background: '#FFFFFF',
-      }}>
-        <div style={{
-          width: '50px',
-          height: '50px',
-          border: '3px solid #E2E8F0',
-          borderTop: '3px solid #03A9F5',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-        }} />
-        <p style={{
-          fontSize: '18px',
-          color: '#1A202C',
-          fontWeight: 500,
-        }}>
-          Redirecting to dashboard...
+          Loading...
         </p>
         <style jsx>{`
           @keyframes spin {
@@ -237,11 +192,11 @@ export default function SignUp() {
           >
           {/* Logo */}
           <img
-            src="/onedot-large.svg"
+            src="/onedot.svg"
             alt="OneDot"
             style={{
               height: 'auto',
-              width: '100px',
+              width: '140px',
               marginBottom: '20px',
               alignSelf: 'flex-start',
             }}
@@ -608,14 +563,43 @@ export default function SignUp() {
             {/* OR Divider */}
             <OrDivider isResponsive={true} />
 
-            {/* Google Button */}
-            <GoogleButton isResponsive={true} />
+            {/* Sign in with text */}
+            <div
+              style={{
+                width: '100%',
+                textAlign: 'center',
+                marginTop: '16px',
+                marginBottom: '16px',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'Montserrat',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  fontSize: 'clamp(14px, 2vw, 16px)',
+                  lineHeight: '150%',
+                  color: '#718096',
+                }}
+              >
+                Sign in with
+              </span>
+            </div>
 
-            {/* GitHub Button */}
-            <GitHubButton isResponsive={true} />
-
-            {/* LinkedIn Button */}
-            <LinkedInButton isResponsive={true} />
+            {/* Social Login Icons */}
+            <div
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '16px',
+              }}
+            >
+              <GoogleButton variant="circle" />
+              <GitHubButton variant="circle" />
+              <LinkedInButton variant="circle" />
+            </div>
           </div>
           </div>
         </PageTransition>
@@ -741,13 +725,13 @@ export default function SignUp() {
 
       {/* Logo */}
       <img
-        src="/onedot-large.svg"
+        src="/onedot.svg"
         alt="OneDot"
         style={{
             position: 'absolute',
             left: '57%',
           top: '8%',
-          height: '4.4vh',
+          height: '6vh',
           width: 'auto',
         }}
       />
@@ -824,7 +808,7 @@ export default function SignUp() {
             position: 'absolute',
             width: '4.5vw',
             height: '1.9vh',
-            left: '-1px',
+            left: '0px',
             top: '0px',
             fontFamily: 'Montserrat',
             fontStyle: 'normal',
@@ -849,7 +833,7 @@ export default function SignUp() {
             width: '27.5vw',
             height: '5.1vh',
             left: '0px',
-            top: '3.2vh',
+            top: '2.4vh',
             background: '#F7FAFC',
             border: '1px solid #CBD5E0',
             boxShadow: 'inset 0px 2px 0px rgba(231, 235, 238, 0.2)',
@@ -887,7 +871,7 @@ export default function SignUp() {
             position: 'absolute',
             width: '2.7vw',
             height: '1.9vh',
-            left: '-1px',
+            left: '0px',
             top: '0px',
             fontFamily: 'Montserrat',
             fontStyle: 'normal',
@@ -911,7 +895,7 @@ export default function SignUp() {
             width: '27.5vw',
             height: '5.1vh',
             left: '0px',
-            top: '3.2vh',
+            top: '2.4vh',
             background: '#F7FAFC',
             border: '1px solid #CBD5E0',
             boxShadow: 'inset 0px 2px 0px rgba(231, 235, 238, 0.2)',
@@ -974,7 +958,7 @@ export default function SignUp() {
               width: '27.5vw',
               height: '5.1vh',
               left: '0px',
-              top: '2.6vh',
+              top: '2.4vh',
               background: '#F7FAFC',
               border: '1px solid #CBD5E0',
               boxShadow: 'inset 0px 2px 0px rgba(231, 235, 238, 0.2)',
@@ -1000,7 +984,7 @@ export default function SignUp() {
             onClick={() => setShowPassword(!showPassword)}
             style={{
               position: 'absolute',
-              top: '2.6vh',
+              top: '2.4vh',
               right: '0px',
               width: '48px',
               height: '5.1vh',
@@ -1050,7 +1034,7 @@ export default function SignUp() {
         <label
           style={{
             position: 'absolute',
-            width: '4.5vw',
+            width: 'auto',
             height: '1.9vh',
             left: '0px',
             top: '0px',
@@ -1061,6 +1045,7 @@ export default function SignUp() {
             lineHeight: '20px',
             letterSpacing: '-0.154px',
             color: '#718096',
+            whiteSpace: 'nowrap',
           }}
         >
           Confirm Password
@@ -1077,7 +1062,7 @@ export default function SignUp() {
               width: '27.5vw',
               height: '5.1vh',
               left: '0px',
-              top: '2.6vh',
+              top: '2.4vh',
               background: '#F7FAFC',
               border: '1px solid #CBD5E0',
               boxShadow: 'inset 0px 2px 0px rgba(231, 235, 238, 0.2)',
@@ -1103,7 +1088,7 @@ export default function SignUp() {
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             style={{
               position: 'absolute',
-              top: '2.6vh',
+              top: '2.4vh',
               right: '0px',
               width: '48px',
               height: '5.1vh',
@@ -1322,103 +1307,47 @@ export default function SignUp() {
         </span>
       </div>
 
-      {/* Google Button */}
-      <button
+      {/* Sign in with text */}
+      <div
         style={{
           position: 'absolute',
-          width: '27.5%',
-          height: '5.6%',
-            left: '57.2%',
+          left: '57.2%',
           top: '73%',
-          border: '1.5px solid #E2E8F0',
-          borderRadius: '12px',
-          background: '#FFFFFF',
-          fontFamily: 'Montserrat',
-          fontStyle: 'normal',
-          fontWeight: 500,
-          fontSize: 'clamp(14px, 1.7vh, 18px)',
-          lineHeight: '28px',
-          color: '#1A202C',
-          cursor: 'pointer',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '10px',
-          transition: 'all 0.2s ease',
-          boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.03)',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = '#03A9F5';
-          e.currentTarget.style.boxShadow = '0px 4px 12px rgba(3, 169, 245, 0.12)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = '#E2E8F0';
-          e.currentTarget.style.boxShadow = '0px 1px 2px rgba(0, 0, 0, 0.03)';
+          width: '27.5%',
+          textAlign: 'center',
         }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24">
-          <path
-            fill="#4285F4"
-            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-          />
-          <path
-            fill="#EA4335"
-            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-          />
-        </svg>
-        <span>Google</span>
-      </button>
+        <span
+          style={{
+            fontFamily: 'Montserrat',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            fontSize: 'clamp(14px, 1.5vh, 16px)',
+            lineHeight: '150%',
+            color: '#718096',
+          }}
+        >
+          Sign in with
+        </span>
+      </div>
 
-      {/* GitHub Button */}
-      <button
+      {/* Social Login Icons */}
+      <div
         style={{
           position: 'absolute',
+          left: '57.2%',
+          top: '78%',
           width: '27.5%',
-          height: '5.6%',
-            left: '57.2%',
-          top: '81%',
-          border: '1.5px solid #E2E8F0',
-          borderRadius: '12px',
-          background: '#FFFFFF',
-          fontFamily: 'Montserrat',
-          fontStyle: 'normal',
-          fontWeight: 500,
-          fontSize: 'clamp(14px, 1.7vh, 18px)',
-          lineHeight: '28px',
-          color: '#1A202C',
-          cursor: 'pointer',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: '10px',
-          transition: 'all 0.2s ease',
-          boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.03)',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = '#03A9F5';
-          e.currentTarget.style.boxShadow = '0px 4px 12px rgba(3, 169, 245, 0.12)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = '#E2E8F0';
-          e.currentTarget.style.boxShadow = '0px 1px 2px rgba(0, 0, 0, 0.03)';
+          gap: '16px',
         }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#181717">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-        </svg>
-        <span>GitHub</span>
-      </button>
-
-      {/* LinkedIn Button */}
-      <LinkedInButton isResponsive={false} />
+        <GoogleButton variant="circle" />
+        <GitHubButton variant="circle" />
+        <LinkedInButton variant="circle" />
+      </div>
 
     </div>
       </PageTransition>

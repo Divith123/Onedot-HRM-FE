@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import AnimatePresenceWrapper from "../components/animations/AnimatePresenceWrapper";
-import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { SessionProvider } from "next-auth/react";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
         type: "image/svg+xml",
       },
     ],
-    apple: "/onedot-large.svg",
+    apple: "/onedot.svg",
   },
 };
 
